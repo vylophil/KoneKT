@@ -9,7 +9,7 @@ $unread_messages = 0;
 $authError = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-  $email = strtolower(trim($_POST['email'] ?? ''));
+  $email    = strtolower(trim($_POST['email'] ?? ''));
   $password = $_POST['password'] ?? '';
 
   if (!validateEmail($email)) {
@@ -22,41 +22,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       $user = $stmt->fetch();
 
       if ($user && (int) $user['is_active'] === 1 && password_verify($password, $user['password_hash'])) {
-        $_SESSION['user_id'] = (int) $user['id'];
-        $_SESSION['email'] = $user['email'];
-        $_SESSION['role'] = $user['role'];
+        $_SESSION['user_id']    = (int) $user['id'];
+        $_SESSION['email']      = $user['email'];
+        $_SESSION['role']       = $user['role'];
         $_SESSION['first_name'] = $user['first_name'];
-        $_SESSION['last_name'] = $user['last_name'];
+        $_SESSION['last_name']  = $user['last_name'];
 
-        header('Location: dashboard.php');
-        exit;
-      }
-
-      if ($email === 'demo@konekt.com' && $password === 'Demo1234') {
-        $_SESSION['user_id'] = 999;
-        $_SESSION['email'] = 'demo@konekt.com';
-        $_SESSION['role'] = 'job_seeker';
-        $_SESSION['first_name'] = 'Demo';
-        $_SESSION['last_name'] = 'User';
-
-        header('Location: dashboard.php');
+        // Redirect based on role
+        $destination = ($user['role'] === 'employer') ? 'employer_dashboard.php' : 'dashboard.php';
+        header('Location: ' . $destination);
         exit;
       }
 
       $authError = 'Invalid email or password.';
     } catch (Throwable $e) {
-      if ($email === 'demo@konekt.com' && $password === 'Demo1234') {
-        $_SESSION['user_id'] = 999;
-        $_SESSION['email'] = 'demo@konekt.com';
-        $_SESSION['role'] = 'job_seeker';
-        $_SESSION['first_name'] = 'Demo';
-        $_SESSION['last_name'] = 'User';
-
-        header('Location: dashboard.php');
-        exit;
-      }
-
-      $authError = 'Unable to sign in right now.';
+      $authError = 'Unable to sign in right now. Please make sure the database is set up.';
     }
   }
 }
@@ -99,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </form>
 
           <div class="mt-3 small text-secondary">
-            Don’t have an account? <a href="register.php">Create one</a>
+            Don't have an account? <a href="register.php">Create one</a>
           </div>
         </div>
       </div>
@@ -107,5 +87,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   </main>
 
   <?php if (file_exists('includes/footer.php')) include 'includes/footer.php'; ?>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

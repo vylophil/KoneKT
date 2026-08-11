@@ -41,13 +41,7 @@ function getDB(): PDO
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
         ];
 
-        try {
-            $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
-        } catch (PDOException $e) {
-            $pdo = new class extends PDO {
-                public function __construct() {}
-            };
-        }
+        $pdo = new PDO($dsn, DB_USER, DB_PASS, $options);
     }
 
     return $pdo;

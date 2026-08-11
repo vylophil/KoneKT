@@ -4,6 +4,13 @@ if (empty($_SESSION['user_id'])) {
   header('Location: login.php');
   exit;
 }
+// Redirect employers to their dashboard
+if (($_SESSION['role'] ?? '') === 'employer') {
+  header('Location: employer_dashboard.php');
+  exit;
+}
+
+require_once __DIR__ . '/api/config/database.php';
 
 $firstName = $_SESSION['first_name'] ?? 'there';
 $lastName = $_SESSION['last_name'] ?? '';
@@ -13,7 +20,69 @@ if ($displayName === '') {
 }
 
 $active_page = 'dashboard';
-$unread_messages = 3; // demo value — pull real count from DB
+
+$db = getDB();
+
+// Pull real unread message count from DB
+$unread_messages = 0;
+try {
+  $stmt = $db->prepare('SELECT COUNT(*) FROM messages WHERE receiver_id = :uid AND is_read = 0');
+  $stmt->execute([':uid' => $_SESSION['user_id']]);
+  $unread_messages = (int) $stmt->fetchColumn();
+} catch (Throwable $e) {}
+
+// Get resume status
+$resumeUrl = null;
+try {
+  $stmt = $db->prepare('SELECT resume_url FROM profiles WHERE user_id = :uid');
+  $stmt->execute([':uid' => $_SESSION['user_id']]);
+  $resumeUrl = $stmt->fetchColumn() ?: null;
+} catch (Throwable $e) {}
+
+// Get top 3 matches
+$topMatches = [];
+try {
+  $stmt = $db->prepare('
+    SELECT jm.match_score, jp.title, jp.location, c.name AS company_name
+    FROM job_matches jm
+    JOIN job_postings jp ON jp.id = jm.job_id AND jp.is_active = 1
+    JOIN companies c ON c.id = jp.company_id
+    WHERE jm.user_id = :uid AND jm.match_score > 0
+    ORDER BY jm.match_score DESC LIMIT 3
+  ');
+  $stmt->execute([':uid' => $_SESSION['user_id']]);
+  $topMatches = $stmt->fetchAll();
+} catch (Throwable $e) {}
+
+// Count total matched jobs
+$totalMatchedJobs = 0;
+try {
+  $stmt = $db->prepare('SELECT COUNT(*) FROM job_matches jm JOIN job_postings jp ON jp.id = jm.job_id AND jp.is_active = 1 WHERE jm.user_id = :uid AND jm.match_score > 0');
+  $stmt->execute([':uid' => $_SESSION['user_id']]);
+  $totalMatchedJobs = (int) $stmt->fetchColumn();
+} catch (Throwable $e) {}
+
+// Get application counts
+$appCount = 0;
+$pendingApps = 0;
+$offeredApps = 0;
+try {
+  $stmt = $db->prepare('SELECT status, COUNT(*) as cnt FROM job_applications WHERE user_id = :uid GROUP BY status');
+  $stmt->execute([':uid' => $_SESSION['user_id']]);
+  foreach ($stmt->fetchAll() as $row) {
+    $appCount += $row['cnt'];
+    if ($row['status'] === 'pending') $pendingApps = $row['cnt'];
+    if ($row['status'] === 'offered') $offeredApps = $row['cnt'];
+  }
+} catch (Throwable $e) {}
+
+// Connection requests
+$connRequests = 0;
+try {
+  $stmt = $db->prepare("SELECT COUNT(*) FROM connections WHERE receiver_id = :uid AND status = 'pending'");
+  $stmt->execute([':uid' => $_SESSION['user_id']]);
+  $connRequests = (int) $stmt->fetchColumn();
+} catch (Throwable $e) {}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -49,39 +118,59 @@ $unread_messages = 3; // demo value — pull real count from DB
           <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
               <h2 class="h5 mb-1">Resume Status</h2>
-              <p class="text-secondary mb-0 small">Last updated 2 days ago</p>
+              <p class="text-secondary mb-0 small"><?= $resumeUrl ? 'Resume uploaded' : 'No resume uploaded yet' ?></p>
             </div>
-            <span class="match-chip"><i class="bi bi-check-circle-fill"></i> Active</span>
+            <?php if ($resumeUrl): ?>
+              <span class="status-badge accepted"><i class="bi bi-check-circle-fill"></i> Active</span>
+            <?php else: ?>
+              <span class="status-badge pending"><i class="bi bi-exclamation-circle"></i> Missing</span>
+            <?php endif; ?>
           </div>
-          <p class="mb-3"><?= htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8') ?>, your resume is being matched against <strong>142 open roles</strong> based on your current preferences.</p>
-          <a href="upload_resume.php" class="btn btn-konekt-outline btn-sm">Re-upload Resume</a>
+          <?php if ($totalMatchedJobs > 0): ?>
+            <p class="mb-3"><?= htmlspecialchars($displayName) ?>, your resume is being matched against <strong><?= $totalMatchedJobs ?> open roles</strong> based on your current preferences.</p>
+          <?php else: ?>
+            <p class="mb-3">Upload your resume and set preferences to start matching with jobs across industries.</p>
+          <?php endif; ?>
+          <a href="upload_resume.php" class="btn btn-konekt-outline btn-sm"><?= $resumeUrl ? 'Re-upload Resume' : 'Upload Resume' ?></a>
         </div>
 
-        <div class="konekt-card p-4">
+        <!-- Top Matches -->
+        <div class="konekt-card p-4 mb-4">
           <h2 class="h5 mb-3">Top Matches for You</h2>
-
-          <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
-            <div>
-              <p class="fw-semibold mb-1">IT Support Specialist</p>
-              <p class="text-secondary small mb-0">Accenture Philippines &middot; Clark, Pampanga</p>
+          <?php if (empty($topMatches)): ?>
+            <p class="text-secondary small">No matches yet. <a href="job_preferences.php">Set your preferences</a> to get started.</p>
+          <?php else: ?>
+            <?php foreach ($topMatches as $i => $match): ?>
+            <div class="d-flex justify-content-between align-items-center py-3 <?= $i < count($topMatches) - 1 ? 'border-bottom' : '' ?>">
+              <div>
+                <p class="fw-semibold mb-1"><?= htmlspecialchars($match['title']) ?></p>
+                <p class="text-secondary small mb-0"><?= htmlspecialchars($match['company_name']) ?> &middot; <?= htmlspecialchars($match['location'] ?? 'Remote') ?></p>
+              </div>
+              <span class="match-chip"><?= round($match['match_score']) ?>% match</span>
             </div>
-            <span class="match-chip">92% match</span>
+            <?php endforeach; ?>
+          <?php endif; ?>
+        </div>
+
+        <!-- My Applications -->
+        <div class="konekt-card p-4">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 mb-0">My Applications</h2>
+            <a href="my_applications.php" class="small">View all &rarr;</a>
           </div>
-
-          <div class="d-flex justify-content-between align-items-center py-3 border-bottom">
+          <div class="d-flex gap-4">
             <div>
-              <p class="fw-semibold mb-1">Junior Systems Administrator</p>
-              <p class="text-secondary small mb-0">Concentrix &middot; San Fernando, Pampanga</p>
+              <span class="h4 fw-bold"><?= $appCount ?></span>
+              <p class="text-secondary small mb-0">Total</p>
             </div>
-            <span class="match-chip">85% match</span>
-          </div>
-
-          <div class="d-flex justify-content-between align-items-center pt-3">
             <div>
-              <p class="fw-semibold mb-1">Database Assistant</p>
-              <p class="text-secondary small mb-0">SM Investments &middot; Tarlac City</p>
+              <span class="h4 fw-bold text-primary"><?= $pendingApps ?></span>
+              <p class="text-secondary small mb-0">Pending</p>
             </div>
-            <span class="match-chip">78% match</span>
+            <div>
+              <span class="h4 fw-bold" style="color: var(--ember-gold);"><?= $offeredApps ?></span>
+              <p class="text-secondary small mb-0">Offered</p>
+            </div>
           </div>
         </div>
       </div>
@@ -90,16 +179,29 @@ $unread_messages = 3; // demo value — pull real count from DB
       <div class="col-lg-4">
         <div class="konekt-card p-4 mb-4">
           <h2 class="h6 mb-3">Your Preferences</h2>
-          <span class="badge rounded-pill text-bg-light border me-2 mb-2">Career growth</span>
-          <span class="badge rounded-pill text-bg-light border me-2 mb-2">Remote friendly</span>
-          <span class="badge rounded-pill text-bg-light border me-2 mb-2">Cross-field roles</span>
+          <?php
+            $userIndustry = '';
+            try {
+              $stmt = $db->prepare('SELECT industry FROM profiles WHERE user_id = :uid');
+              $stmt->execute([':uid' => $_SESSION['user_id']]);
+              $userIndustry = $stmt->fetchColumn() ?: '';
+            } catch (Throwable $e) {}
+            $prefs = array_filter(array_map('trim', explode(',', $userIndustry)));
+          ?>
+          <?php if (!empty($prefs)): ?>
+            <?php foreach ($prefs as $p): ?>
+              <span class="badge rounded-pill text-bg-light border me-2 mb-2"><?= htmlspecialchars($p) ?></span>
+            <?php endforeach; ?>
+          <?php else: ?>
+            <p class="text-secondary small mb-0">No preferences set yet.</p>
+          <?php endif; ?>
           <a href="job_preferences.php" class="d-block mt-2 small">Edit preferences &rarr;</a>
         </div>
 
         <div class="konekt-card p-4 mb-4">
           <h2 class="h6 mb-3">Network Activity</h2>
-          <p class="small text-secondary mb-2"><strong>3</strong> new connection requests</p>
-          <p class="small text-secondary mb-3"><strong>2</strong> unread messages</p>
+          <p class="small text-secondary mb-2"><strong><?= $connRequests ?></strong> new connection request<?= $connRequests !== 1 ? 's' : '' ?></p>
+          <p class="small text-secondary mb-3"><strong><?= $unread_messages ?></strong> unread message<?= $unread_messages !== 1 ? 's' : '' ?></p>
           <a href="network.php" class="btn btn-konekt-outline btn-sm w-100">Go to Network</a>
         </div>
 

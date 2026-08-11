@@ -1,3 +1,11 @@
+<?php
+// Ensure $active_page and $unread_messages are set by the including page
+$active_page      = $active_page ?? 'home';
+$unread_messages   = $unread_messages ?? 0;
+$sessionRole       = $_SESSION['role'] ?? '';
+$isEmployer        = ($sessionRole === 'employer');
+$isLoggedIn        = !empty($_SESSION['user_id']);
+?>
 <nav class="navbar navbar-expand-lg konekt-navbar sticky-top">
   <div class="container">
     <!-- Brand Title matching theme tokens -->
@@ -15,15 +23,34 @@
         <li class="nav-item">
           <a class="nav-link <?= ($active_page === 'home') ? 'active' : '' ?>" href="index.php">Home</a>
         </li>
-        <li class="nav-item">
-          <a class="nav-link <?= ($active_page === 'dashboard') ? 'active' : '' ?>" href="dashboard.php">Dashboard</a>
-        </li>
-        <li class="nav-item">
-          <a class="nav-link <?= ($active_page === 'upload') ? 'active' : '' ?>" href="upload_resume.php">Upload & Preferences</a>
-        </li>
+
+        <?php if ($isEmployer): ?>
+          <!-- Employer navigation -->
+          <li class="nav-item">
+            <a class="nav-link <?= ($active_page === 'employer_dashboard') ? 'active' : '' ?>" href="employer_dashboard.php">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?= ($active_page === 'employer_jobs') ? 'active' : '' ?>" href="employer_jobs.php">My Jobs</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?= ($active_page === 'employer_applicants') ? 'active' : '' ?>" href="employer_applicants.php">Applicants</a>
+          </li>
+        <?php else: ?>
+          <!-- Job seeker navigation -->
+          <li class="nav-item">
+            <a class="nav-link <?= ($active_page === 'dashboard') ? 'active' : '' ?>" href="dashboard.php">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?= ($active_page === 'upload') ? 'active' : '' ?>" href="upload_resume.php">Upload & Preferences</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link <?= ($active_page === 'find_jobs') ? 'active' : '' ?>" href="find_jobs.php">Find Jobs</a>
+          </li>
+        <?php endif; ?>
+
         <li class="nav-item">
           <a class="nav-link <?= ($active_page === 'network') ? 'active' : '' ?>" href="network.php">
-            Network 
+            Network
             <?php if (!empty($unread_messages)): ?>
               <span class="nav-badge"><?= $unread_messages ?></span>
             <?php endif; ?>
@@ -32,17 +59,17 @@
       </ul>
 
       <div class="d-flex align-items-center gap-2">
-        <?php if (isset($_SESSION['user_id']) && $_SESSION['user_id']): ?>
-          <a href="dashboard.php" class="btn btn-konekt-outline text-white border-white-50 btn-sm px-3">
+        <?php if ($isLoggedIn): ?>
+          <a href="<?= $isEmployer ? 'employer_dashboard.php' : 'dashboard.php' ?>" class="btn btn-konekt-outline text-white border-white-50 btn-sm px-3">
             <?= htmlspecialchars($_SESSION['first_name'] ?? 'My Account', ENT_QUOTES, 'UTF-8') ?>
           </a>
-          <form method="post" action="api/auth/logout.php" class="d-inline">
-            <button type="submit" class="btn btn-outline-light btn-sm px-3">Logout</button>
-          </form>
+          <a href="logout.php" class="btn btn-outline-light btn-sm px-3 opacity-75">Sign Out</a>
         <?php else: ?>
           <a href="login.php" class="btn btn-konekt-outline text-white border-white-50 btn-sm px-3">Sign In</a>
         <?php endif; ?>
-        <a href="find_jobs.php" class="btn btn-konekt-gold btn-sm px-3">Find Jobs</a>
+        <?php if (!$isEmployer): ?>
+          <a href="find_jobs.php" class="btn btn-konekt-gold btn-sm px-3">Find Jobs</a>
+        <?php endif; ?>
       </div>
     </div>
   </div>

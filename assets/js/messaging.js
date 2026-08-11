@@ -1,120 +1,171 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const conversationLinks = document.querySelectorAll('[data-conversation-id]');
-  const chatMessages = document.getElementById('chatMessages');
-  const chatHeaderName = document.getElementById('chatHeaderName');
-  const chatHeaderSubtitle = document.getElementById('chatHeaderSubtitle');
-  const messageInput = document.getElementById('messageInput');
   const messageForm = document.getElementById('messageForm');
+  const messageInput = document.getElementById('messageInput');
   const messageStatus = document.getElementById('messageStatus');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatBody = document.getElementById('chatBody');
+  const receiverInput = document.getElementById('receiverId');
 
-  const conversationData = {
-    2: {
-      name: 'Sarah Jenkins',
-      subtitle: 'Recruiter · Accenture Philippines',
-      messages: [
-        {
-          sender: 'other',
-          text: 'Hi Ralph! We noticed your high match score for our IT Support Specialist opening in Clark.',
-          time: '10:14 AM'
-        },
-        {
-          sender: 'me',
-          text: 'Hello Sarah! Yes, I am very interested in exploring tech roles with Accenture.',
-          time: '10:16 AM'
-        }
-      ]
-    },
-    3: {
-      name: 'Ramon David',
-      subtitle: 'Hiring Manager · SG&Co',
-      messages: [
-        {
-          sender: 'other',
-          text: 'We reviewed your resume match score and it looks promising for our finance-facing systems role.',
-          time: '9:40 AM'
-        }
-      ]
+  // Scroll to bottom of chat
+  function scrollToBottom() {
+    if (chatBody) {
+      chatBody.scrollTop = chatBody.scrollHeight;
     }
-  };
+  }
+  scrollToBottom();
 
-  let activeConversationId = 2;
-
-  const renderMessages = (conversationId) => {
-    const data = conversationData[conversationId] || conversationData[2];
-    const messages = data.messages || [];
-
-    chatHeaderName.textContent = data.name;
-    chatHeaderSubtitle.innerHTML = data.subtitle;
-    chatMessages.innerHTML = '';
-
-    messages.forEach((message) => {
-      const wrapper = document.createElement('div');
-      wrapper.className = message.sender === 'me'
-        ? 'd-flex align-items-start gap-2 align-self-end max-w-75'
-        : 'd-flex align-items-start gap-2 max-w-75';
-
-      const bubble = document.createElement('div');
-      bubble.className = message.sender === 'me'
-        ? 'p-3 rounded-3 text-white shadow-sm'
-        : 'p-3 rounded-3 bg-white border shadow-sm';
-      bubble.style.backgroundColor = message.sender === 'me' ? 'var(--signal-blue)' : '';
-
-      const body = document.createElement('p');
-      body.className = 'mb-0 small';
-      body.textContent = message.text;
-
-      const time = document.createElement('span');
-      time.className = message.sender === 'me' ? 'text-white-50 extra-small mt-1 d-block text-end' : 'text-secondary extra-small mt-1 d-block';
-      time.textContent = message.time;
-
-      bubble.appendChild(body);
-      bubble.appendChild(time);
-      wrapper.appendChild(bubble);
-      chatMessages.appendChild(wrapper);
-    });
-
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-  };
-
-  const setActiveThread = (link) => {
-    conversationLinks.forEach((item) => item.classList.remove('active', 'bg-light', 'text-dark'));
-    link.classList.add('active', 'bg-light', 'text-dark');
-    activeConversationId = Number(link.dataset.conversationId || 2);
-    renderMessages(activeConversationId);
-  };
-
-  conversationLinks.forEach((link) => {
-    link.addEventListener('click', (event) => {
+  // --- Send Message ---
+  if (messageForm) {
+    messageForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      setActiveThread(link);
+      const text = messageInput.value.trim();
+      const receiverId = receiverInput ? parseInt(receiverInput.value) : 0;
+
+      if (!text) {
+        messageStatus.textContent = 'Please enter a message before sending.';
+        return;
+      }
+
+      if (!window.currentUserId) {
+        messageStatus.textContent = 'You need to be logged in to send messages.';
+        return;
+      }
+
+      if (!receiverId) {
+        messageStatus.textContent = 'No recipient selected.';
+        return;
+      }
+
+      // Optimistically render the message
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+      appendMessage(text, timeStr, true);
+      messageInput.value = '';
+      messageInput.focus();
+      messageStatus.textContent = 'Sending...';
+
+      try {
+        const res = await fetch('api/networking/send_message.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            receiver_id: receiverId,
+            content: text
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          messageStatus.textContent = '';
+        } else {
+          messageStatus.textContent = data.message || 'Failed to send message.';
+        }
+      } catch (err) {
+        messageStatus.textContent = 'Network error. Message may not have been delivered.';
+      }
     });
-  });
+  }
 
-  messageForm.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const text = messageInput.value.trim();
+  // --- Append a message bubble to the chat ---
+  function appendMessage(text, timeStr, isMine) {
+    if (!chatMessages) return;
 
-    if (!text) {
-      messageStatus.textContent = 'Please enter a message before sending.';
-      return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'd-flex align-items-start gap-2' + (isMine ? ' align-self-end' : '');
+    wrapper.style.maxWidth = '75%';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'p-3 rounded-3 shadow-sm' + (isMine ? ' text-white' : ' bg-white border');
+    if (isMine) {
+      bubble.style.backgroundColor = 'var(--signal-blue)';
     }
 
-    if (!window.currentUserId) {
-      messageStatus.textContent = 'You need to be logged in to send messages.';
-      return;
+    const body = document.createElement('p');
+    body.className = 'mb-0 small';
+    body.textContent = text;
+
+    const time = document.createElement('span');
+    time.className = (isMine ? 'text-white-50' : 'text-secondary') + ' mt-1 d-block';
+    time.style.fontSize = '0.68rem';
+    time.textContent = timeStr;
+
+    bubble.appendChild(body);
+    bubble.appendChild(time);
+    wrapper.appendChild(bubble);
+    chatMessages.appendChild(wrapper);
+
+    scrollToBottom();
+  }
+
+  // --- Poll for new messages every 5 seconds ---
+  let lastMessageCount = chatMessages ? chatMessages.children.length : 0;
+
+  async function pollMessages() {
+    const receiverId = receiverInput ? parseInt(receiverInput.value) : 0;
+    if (!receiverId || !window.currentUserId) return;
+
+    try {
+      const res = await fetch(`api/networking/get_messages.php?user_id=${receiverId}&limit=100`);
+      const data = await res.json();
+
+      if (data.success && data.data.messages) {
+        const messages = data.data.messages.reverse(); // API returns DESC, we want ASC
+        if (messages.length > lastMessageCount) {
+          // New messages arrived — re-render
+          chatMessages.innerHTML = '';
+          messages.forEach(msg => {
+            const isMine = msg.sender_id == window.currentUserId;
+            const timeStr = new Date(msg.sent_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+            appendMessage(msg.content, timeStr, isMine);
+          });
+          lastMessageCount = messages.length;
+        }
+      }
+    } catch (err) {
+      // Silent fail on polling
     }
+  }
 
-    const conversation = conversationData[activeConversationId] || conversationData[2];
-    conversation.messages.push({
-      sender: 'me',
-      text,
-      time: new Date().toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })
+  // Start polling if we have an active chat
+  if (receiverInput && parseInt(receiverInput.value) > 0) {
+    setInterval(pollMessages, 5000);
+  }
+
+  // --- Connection Request Accept/Reject ---
+  document.querySelectorAll('.conn-respond').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const connId = parseInt(btn.dataset.id);
+      const action = btn.dataset.action;
+
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('api/networking/respond_connection.php', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            connection_id: connId,
+            action: action
+          })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          const row = document.getElementById('conn-' + connId);
+          if (row) {
+            row.innerHTML = `<span class="small ${action === 'accept' ? 'text-success' : 'text-secondary'}">
+              <i class="bi bi-${action === 'accept' ? 'check-circle' : 'x-circle'} me-1"></i>
+              ${action === 'accept' ? 'Accepted' : 'Declined'}
+            </span>`;
+          }
+        } else {
+          alert(data.message || 'Action failed.');
+          btn.disabled = false;
+        }
+      } catch (err) {
+        alert('Network error.');
+        btn.disabled = false;
+      }
     });
-
-    messageInput.value = '';
-    renderMessages(activeConversationId);
-    messageStatus.textContent = 'Message sent locally. Connect the backend later if you want persistence.';
   });
-
-  renderMessages(activeConversationId);
 });

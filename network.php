@@ -5,9 +5,131 @@ if (empty($_SESSION['user_id'])) {
   exit;
 }
 
+require_once __DIR__ . '/api/config/database.php';
+
 $active_page = 'network';
-$unread_messages = 3;
-$currentUserId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+
+$db = getDB();
+
+// Pull real unread message count from DB
+$unread_messages = 0;
+try {
+  $stmt = $db->prepare('SELECT COUNT(*) FROM messages WHERE receiver_id = :uid AND is_read = 0');
+  $stmt->execute([':uid' => $_SESSION['user_id']]);
+  $unread_messages = (int) $stmt->fetchColumn();
+} catch (Throwable $e) {}
+
+$currentUserId = (int) $_SESSION['user_id'];
+
+// Get pending connection requests (received by this user)
+$pendingRequests = [];
+try {
+  $stmt = $db->prepare("
+    SELECT c.id AS connection_id, c.message, c.created_at,
+           u.id AS user_id, u.first_name, u.last_name,
+           p.headline, p.avatar_url
+    FROM connections c
+    JOIN users u ON u.id = c.requester_id
+    LEFT JOIN profiles p ON p.user_id = u.id
+    WHERE c.receiver_id = :uid AND c.status = 'pending'
+    ORDER BY c.created_at DESC
+  ");
+  $stmt->execute([':uid' => $currentUserId]);
+  $pendingRequests = $stmt->fetchAll();
+} catch (Throwable $e) {}
+
+// Get conversations (most recent message per partner)
+$conversations = [];
+try {
+  $stmt = $db->prepare("
+    SELECT
+      other_user_id,
+      u.first_name, u.last_name,
+      p.headline, p.avatar_url,
+      latest.content AS last_message,
+      latest.sent_at AS last_message_at,
+      latest.sender_id AS last_sender_id,
+      (
+        SELECT COUNT(*) FROM messages m2
+        WHERE m2.sender_id = other_user_id
+        AND m2.receiver_id = :me_unread
+        AND m2.is_read = 0
+      ) AS unread_count
+    FROM (
+      SELECT
+        IF(sender_id = :me1, receiver_id, sender_id) AS other_user_id,
+        MAX(id) AS last_msg_id
+      FROM messages
+      WHERE sender_id = :me2 OR receiver_id = :me3
+      GROUP BY other_user_id
+      ORDER BY last_msg_id DESC
+      LIMIT 20
+    ) AS convos
+    JOIN messages latest ON latest.id = convos.last_msg_id
+    JOIN users u ON u.id = convos.other_user_id
+    LEFT JOIN profiles p ON p.user_id = convos.other_user_id
+    ORDER BY latest.sent_at DESC
+  ");
+  $stmt->bindValue(':me1', $currentUserId, PDO::PARAM_INT);
+  $stmt->bindValue(':me2', $currentUserId, PDO::PARAM_INT);
+  $stmt->bindValue(':me3', $currentUserId, PDO::PARAM_INT);
+  $stmt->bindValue(':me_unread', $currentUserId, PDO::PARAM_INT);
+  $stmt->execute();
+  $conversations = $stmt->fetchAll();
+} catch (Throwable $e) {}
+
+// Get the active chat partner (first conversation or from query param)
+$activeChatUserId = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+if (!$activeChatUserId && !empty($conversations)) {
+  $activeChatUserId = (int) $conversations[0]['other_user_id'];
+}
+
+// Get active chat partner info
+$chatPartner = null;
+if ($activeChatUserId) {
+  try {
+    $stmt = $db->prepare('
+      SELECT u.id, u.first_name, u.last_name, p.headline, p.avatar_url
+      FROM users u LEFT JOIN profiles p ON p.user_id = u.id WHERE u.id = :id
+    ');
+    $stmt->execute([':id' => $activeChatUserId]);
+    $chatPartner = $stmt->fetch();
+  } catch (Throwable $e) {}
+}
+
+// Get messages for the active chat
+$chatMessages = [];
+if ($activeChatUserId) {
+  try {
+    $stmt = $db->prepare('
+      SELECT m.id, m.sender_id, m.receiver_id, m.content, m.is_read, m.sent_at
+      FROM messages m
+      WHERE (m.sender_id = :me1 AND m.receiver_id = :them1)
+         OR (m.sender_id = :them2 AND m.receiver_id = :me2)
+      ORDER BY m.sent_at ASC
+      LIMIT 100
+    ');
+    $stmt->execute([':me1' => $currentUserId, ':them1' => $activeChatUserId, ':them2' => $activeChatUserId, ':me2' => $currentUserId]);
+    $chatMessages = $stmt->fetchAll();
+
+    // Mark as read
+    $stmt = $db->prepare('UPDATE messages SET is_read = 1 WHERE sender_id = :sid AND receiver_id = :rid AND is_read = 0');
+    $stmt->execute([':sid' => $activeChatUserId, ':rid' => $currentUserId]);
+  } catch (Throwable $e) {}
+}
+
+function getInitials($first, $last) {
+  return strtoupper(mb_substr($first, 0, 1) . mb_substr($last, 0, 1));
+}
+
+function timeAgo($datetime) {
+  $diff = time() - strtotime($datetime);
+  if ($diff < 60) return 'now';
+  if ($diff < 3600) return floor($diff / 60) . 'm';
+  if ($diff < 86400) return floor($diff / 3600) . 'h';
+  if ($diff < 604800) return floor($diff / 86400) . 'd';
+  return date('M j', strtotime($datetime));
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -32,73 +154,77 @@ $currentUserId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null
 
   <main class="container py-4">
     <div class="row g-4">
-      
+
       <!-- Left Panel: Conversations & Pending Connections -->
       <div class="col-lg-4">
-        
+
         <!-- Connection Requests Card -->
+        <?php if (!empty($pendingRequests)): ?>
         <div class="konekt-card p-3 mb-3">
           <h2 class="h6 mb-3 d-flex justify-content-between align-items-center">
             <span>Pending Requests</span>
-            <span class="badge bg-primary rounded-pill">2</span>
+            <span class="badge bg-primary rounded-pill"><?= count($pendingRequests) ?></span>
           </h2>
-          
-          <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+
+          <?php foreach ($pendingRequests as $req): ?>
+          <div class="d-flex align-items-center justify-content-between py-2 border-bottom" id="conn-<?= $req['connection_id'] ?>">
             <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold" style="width:36px; height:36px;">
-                MC
+              <div class="applicant-avatar" style="width:36px; height:36px; font-size: 0.75rem;">
+                <?= getInitials($req['first_name'], $req['last_name']) ?>
               </div>
               <div>
-                <p class="fw-semibold mb-0 small">Mark Cruz</p>
-                <p class="text-secondary extra-small mb-0">Talent Acquisition &middot; Medical City</p>
+                <p class="fw-semibold mb-0 small"><?= htmlspecialchars($req['first_name'] . ' ' . $req['last_name']) ?></p>
+                <p class="text-secondary mb-0" style="font-size: 0.72rem;"><?= htmlspecialchars($req['headline'] ?? 'KoneKT User') ?></p>
               </div>
             </div>
             <div class="d-flex gap-1">
-              <button class="btn btn-konekt-gold btn-sm py-0 px-2"><i class="bi bi-check"></i></button>
-              <button class="btn btn-outline-secondary btn-sm py-0 px-2"><i class="bi bi-x"></i></button>
+              <button class="btn btn-konekt-gold btn-sm py-0 px-2 conn-respond" data-id="<?= $req['connection_id'] ?>" data-action="accept"><i class="bi bi-check"></i></button>
+              <button class="btn btn-outline-secondary btn-sm py-0 px-2 conn-respond" data-id="<?= $req['connection_id'] ?>" data-action="reject"><i class="bi bi-x"></i></button>
             </div>
           </div>
+          <?php endforeach; ?>
         </div>
+        <?php endif; ?>
 
         <!-- Direct Messages Sidebar -->
         <div class="konekt-card p-3">
           <h2 class="h6 mb-3">Messages</h2>
+
+          <?php if (empty($conversations)): ?>
+            <p class="text-secondary small mb-0">No conversations yet. Connect with people to start messaging.</p>
+          <?php else: ?>
           <div class="list-group list-group-flush">
-            
-            <a href="network.php" data-conversation-id="2" data-name="Sarah Jenkins" data-subtitle="Recruiter · Accenture Philippines" class="list-group-item list-group-item-action border-0 rounded p-2 active bg-light text-dark mb-1">
+            <?php foreach ($conversations as $conv): ?>
+            <a href="network.php?user_id=<?= $conv['other_user_id'] ?>"
+               class="list-group-item list-group-item-action border-0 rounded p-2 mb-1 <?= $activeChatUserId == $conv['other_user_id'] ? 'active bg-light text-dark' : '' ?>"
+               data-user-id="<?= $conv['other_user_id'] ?>"
+               data-name="<?= htmlspecialchars($conv['first_name'] . ' ' . $conv['last_name']) ?>"
+               data-subtitle="<?= htmlspecialchars($conv['headline'] ?? 'KoneKT User') ?>">
               <div class="d-flex align-items-center gap-2">
                 <div class="position-relative">
-                  <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style="width:38px; height:38px; background-color: var(--ink-navy);">
-                    SJ
+                  <div class="applicant-avatar" style="width:38px; height:38px; font-size: 0.8rem;">
+                    <?= getInitials($conv['first_name'], $conv['last_name']) ?>
                   </div>
-                  <span class="position-absolute bottom-0 end-0 p-1 bg-success border border-light rounded-circle"></span>
                 </div>
                 <div class="flex-grow-1 overflow-hidden">
                   <div class="d-flex justify-content-between align-items-center">
-                    <p class="fw-semibold mb-0 small text-truncate">Sarah Jenkins</p>
-                    <span class="text-secondary extra-small">10m</span>
+                    <p class="fw-semibold mb-0 small text-truncate"><?= htmlspecialchars($conv['first_name'] . ' ' . $conv['last_name']) ?></p>
+                    <span class="text-secondary" style="font-size: 0.7rem;"><?= timeAgo($conv['last_message_at']) ?></span>
                   </div>
-                  <p class="text-secondary small mb-0 text-truncate">Are you interested in the IT position?</p>
+                  <p class="text-secondary small mb-0 text-truncate">
+                    <?php if ($conv['unread_count'] > 0): ?><strong><?php endif; ?>
+                    <?= htmlspecialchars(mb_strimwidth($conv['last_message'], 0, 45, '...')) ?>
+                    <?php if ($conv['unread_count'] > 0): ?></strong><?php endif; ?>
+                  </p>
                 </div>
+                <?php if ($conv['unread_count'] > 0): ?>
+                  <span class="badge bg-primary rounded-pill" style="font-size: 0.65rem;"><?= $conv['unread_count'] ?></span>
+                <?php endif; ?>
               </div>
             </a>
-
-            <a href="network.php" data-conversation-id="3" data-name="Ramon David" data-subtitle="Hiring Manager · SG&amp;Co" class="list-group-item list-group-item-action border-0 rounded p-2 mb-1">
-              <div class="d-flex align-items-center gap-2">
-                <div class="rounded-circle bg-secondary text-white d-flex align-items-center justify-content-center fw-bold" style="width:38px; height:38px;">
-                  RD
-                </div>
-                <div class="flex-grow-1 overflow-hidden">
-                  <div class="d-flex justify-content-between align-items-center">
-                    <p class="fw-semibold mb-0 small text-truncate">Ramon David</p>
-                    <span class="text-secondary extra-small">2h</span>
-                  </div>
-                  <p class="text-secondary small mb-0 text-truncate">We reviewed your resume match score.</p>
-                </div>
-              </div>
-            </a>
-
+            <?php endforeach; ?>
           </div>
+          <?php endif; ?>
         </div>
 
       </div>
@@ -106,34 +232,58 @@ $currentUserId = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null
       <!-- Right Panel: Active Chat Window -->
       <div class="col-lg-8">
         <div class="konekt-card d-flex flex-column" style="min-height: 520px; height: 72vh;">
-          
+
+          <?php if ($chatPartner): ?>
           <!-- Chat Header -->
           <div class="p-3 border-bottom d-flex justify-content-between align-items-center bg-white rounded-top">
             <div class="d-flex align-items-center gap-2">
-              <div class="rounded-circle text-white d-flex align-items-center justify-content-center fw-bold" style="width:38px; height:38px; background-color: var(--ink-navy);">
-                SJ
+              <div class="applicant-avatar" style="width:38px; height:38px; font-size: 0.8rem;">
+                <?= getInitials($chatPartner['first_name'], $chatPartner['last_name']) ?>
               </div>
               <div>
-                <h3 id="chatHeaderName" class="h6 mb-0">Sarah Jenkins</h3>
-                <span id="chatHeaderSubtitle" class="text-secondary extra-small">Recruiter &middot; Accenture Philippines</span>
+                <h3 id="chatHeaderName" class="h6 mb-0"><?= htmlspecialchars($chatPartner['first_name'] . ' ' . $chatPartner['last_name']) ?></h3>
+                <span id="chatHeaderSubtitle" class="text-secondary" style="font-size: 0.75rem;"><?= htmlspecialchars($chatPartner['headline'] ?? 'KoneKT User') ?></span>
               </div>
             </div>
-            <span class="match-chip"><i class="bi bi-stars"></i> 92% match</span>
           </div>
 
           <!-- Messages Scrollable Body -->
-          <div class="p-3 flex-grow-1 overflow-auto" style="background-color: var(--mist);">
-            <div id="chatMessages" class="d-flex flex-column gap-3"></div>
+          <div class="p-3 flex-grow-1 overflow-auto" style="background-color: var(--mist);" id="chatBody">
+            <div id="chatMessages" class="d-flex flex-column gap-3">
+              <?php foreach ($chatMessages as $msg): ?>
+              <div class="d-flex align-items-start gap-2 <?= $msg['sender_id'] == $currentUserId ? 'align-self-end' : '' ?>" style="max-width: 75%;">
+                <div class="p-3 rounded-3 shadow-sm <?= $msg['sender_id'] == $currentUserId ? 'text-white' : 'bg-white border' ?>"
+                     style="<?= $msg['sender_id'] == $currentUserId ? 'background-color: var(--signal-blue);' : '' ?>">
+                  <p class="mb-0 small"><?= htmlspecialchars($msg['content']) ?></p>
+                  <span class="<?= $msg['sender_id'] == $currentUserId ? 'text-white-50' : 'text-secondary' ?> mt-1 d-block" style="font-size: 0.68rem;">
+                    <?= date('g:i A', strtotime($msg['sent_at'])) ?>
+                  </span>
+                </div>
+              </div>
+              <?php endforeach; ?>
+            </div>
           </div>
 
           <!-- Chat Input -->
           <div class="p-3 border-top bg-white rounded-bottom">
             <form id="messageForm" class="d-flex gap-2">
+              <input type="hidden" id="receiverId" value="<?= $activeChatUserId ?>">
               <input id="messageInput" type="text" class="form-control" placeholder="Write a message..." autocomplete="off" required>
               <button type="submit" class="btn btn-konekt-primary"><i class="bi bi-send-fill"></i></button>
             </form>
-            <div id="messageStatus" class="form-text mt-2 small text-secondary">Ready to send a message.</div>
+            <div id="messageStatus" class="form-text mt-2 small text-secondary"></div>
           </div>
+
+          <?php else: ?>
+          <!-- No chat selected -->
+          <div class="flex-grow-1 d-flex align-items-center justify-content-center">
+            <div class="empty-state">
+              <i class="bi bi-chat-dots"></i>
+              <h3 class="h5 mb-2">Select a conversation</h3>
+              <p class="text-secondary">Choose a conversation from the left panel, or connect with someone to start messaging.</p>
+            </div>
+          </div>
+          <?php endif; ?>
 
         </div>
       </div>
