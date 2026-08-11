@@ -1,0 +1,258 @@
+/* ============================================
+   KoneKT Theme — Design Tokens
+   ============================================ */
+:root {
+  --ink-navy: #1B2A4A;
+  --ink-navy-soft: #24365C;
+  --signal-blue: #2F6FED;
+  --signal-blue-dark: #1E54C4;
+  --ember-gold: #F5A524;
+  --ember-gold-soft: #FFF3DE;
+  --mist: #F6F7FB;
+  --slate: #5B6478;
+  --slate-light: #9AA2B4;
+  --white: #FFFFFF;
+  --line: #E4E7EF;
+
+  --font-display: 'Sora', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  --radius: 10px;
+  --shadow-sm: 0 1px 2px rgba(27, 42, 74, 0.06);
+  --shadow-md: 0 8px 24px rgba(27, 42, 74, 0.08);
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--mist);
+  color: var(--ink-navy);
+}
+
+h1, h2, h3, h4, h5, h6,
+.brand-font {
+  font-family: var(--font-display);
+  font-weight: 600;
+  color: var(--ink-navy);
+}
+
+a {
+  color: var(--signal-blue);
+  text-decoration: none;
+}
+a:hover {
+  color: var(--signal-blue-dark);
+}
+
+/* ============================================
+   Navbar
+   ============================================ */
+.konekt-navbar {
+  background-color: var(--ink-navy);
+  padding: 0.65rem 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.konekt-navbar .navbar-brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  letter-spacing: -0.01em;
+}
+
+.konekt-navbar .navbar-brand .brand-k {
+  color: var(--ember-gold);
+}
+
+/* Pulse dot — signals "actively matching" */
+.match-pulse {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--ember-gold);
+  display: inline-block;
+  position: relative;
+}
+.match-pulse::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  background-color: var(--ember-gold);
+  animation: pulse-ring 1.8s ease-out infinite;
+}
+@keyframes pulse-ring {
+  0%   { transform: scale(1); opacity: 0.6; }
+  100% { transform: scale(2.8); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .match-pulse::after { animation: none; }
+}
+
+.konekt-navbar .nav-link {
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 500;
+  font-size: 0.94rem;
+  padding: 0.5rem 0.9rem !important;
+  border-radius: var(--radius);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+.konekt-navbar .nav-link:hover {
+  color: var(--white);
+  background-color: rgba(255, 255, 255, 0.08);
+}
+.konekt-navbar .nav-link.active {
+  color: var(--white);
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.konekt-navbar .nav-link:focus-visible,
+.konekt-navbar .navbar-brand:focus-visible {
+  outline: 2px solid var(--ember-gold);
+  outline-offset: 2px;
+}
+
+/* Message badge — styled like a match chip, mono font */
+.nav-badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  background-color: var(--ember-gold);
+  color: var(--ink-navy);
+  border-radius: 20px;
+  padding: 0.08rem 0.4rem;
+  margin-left: 0.35rem;
+  vertical-align: 2px;
+}
+
+.konekt-navbar .dropdown-menu {
+  border: none;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-md);
+  margin-top: 0.5rem;
+  padding: 0.4rem;
+}
+.konekt-navbar .dropdown-item {
+  border-radius: 6px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+}
+.konekt-navbar .dropdown-item:hover {
+  background-color: var(--mist);
+}
+.konekt-navbar .dropdown-item.text-danger:hover {
+  background-color: #FEECEC;
+}
+
+.konekt-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+}
+
+/* ============================================
+   Match score chip — reusable signature element
+   ============================================ */
+.match-chip {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  background-color: var(--ember-gold-soft);
+  color: #9A5F0B;
+  border: 1px solid #F3D9A8;
+  border-radius: 20px;
+  padding: 0.2rem 0.65rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* ============================================
+   Buttons
+   ============================================ */
+.btn-konekt-primary {
+  background-color: var(--signal-blue);
+  border-color: var(--signal-blue);
+  color: var(--white);
+  font-weight: 600;
+  border-radius: var(--radius);
+}
+.btn-konekt-primary:hover {
+  background-color: var(--signal-blue-dark);
+  border-color: var(--signal-blue-dark);
+  color: var(--white);
+}
+
+.btn-konekt-gold {
+  background-color: var(--ember-gold);
+  border-color: var(--ember-gold);
+  color: var(--ink-navy);
+  font-weight: 600;
+  border-radius: var(--radius);
+}
+.btn-konekt-gold:hover {
+  background-color: #E0940F;
+  border-color: #E0940F;
+  color: var(--ink-navy);
+}
+
+.btn-konekt-outline {
+  background-color: transparent;
+  border: 1.5px solid var(--line);
+  color: var(--ink-navy);
+  font-weight: 600;
+  border-radius: var(--radius);
+}
+.btn-konekt-outline:hover {
+  border-color: var(--signal-blue);
+  color: var(--signal-blue);
+}
+
+/* ============================================
+   Card
+   ============================================ */
+.konekt-card {
+  background-color: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ============================================
+   Footer
+   ============================================ */
+.konekt-footer {
+  background-color: var(--white);
+  border-top: 1px solid var(--line);
+  padding: 2.5rem 0 1.5rem;
+  margin-top: 4rem;
+  font-size: 0.88rem;
+  color: var(--slate);
+}
+.konekt-footer h6 {
+  font-family: var(--font-display);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--ink-navy);
+  margin-bottom: 0.9rem;
+}
+.konekt-footer a {
+  color: var(--slate);
+}
+.konekt-footer a:hover {
+  color: var(--signal-blue);
+}
+.konekt-footer .footer-bottom {
+  border-top: 1px solid var(--line);
+  margin-top: 2rem;
+  padding-top: 1.25rem;
+  font-size: 0.82rem;
+  color: var(--slate-light);
+}
