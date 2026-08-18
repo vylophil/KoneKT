@@ -30,8 +30,8 @@ try {
 
     $db->beginTransaction();
 
-    $db->prepare('DELETE FROM messages WHERE sender_id = :user_id OR receiver_id = :user_id')->execute([':user_id' => $userId]);
-    $db->prepare('DELETE FROM connections WHERE requester_id = :user_id OR receiver_id = :user_id')->execute([':user_id' => $userId]);
+    $db->prepare('DELETE FROM messages WHERE sender_id = :user_id1 OR receiver_id = :user_id2')->execute([':user_id1' => $userId, ':user_id2' => $userId]);
+    $db->prepare('DELETE FROM connections WHERE requester_id = :user_id1 OR receiver_id = :user_id2')->execute([':user_id1' => $userId, ':user_id2' => $userId]);
     $db->prepare('DELETE FROM job_applications WHERE user_id = :user_id')->execute([':user_id' => $userId]);
     $db->prepare('DELETE FROM saved_jobs WHERE user_id = :user_id')->execute([':user_id' => $userId]);
     $db->prepare('DELETE FROM job_matches WHERE user_id = :user_id')->execute([':user_id' => $userId]);

@@ -11,7 +11,7 @@ $isLoggedIn        = !empty($_SESSION['user_id']);
     <!-- Brand Title matching theme tokens -->
     <a class="navbar-brand" href="index.php">
       <span class="match-pulse me-1"></span>
-      <KT class="brand-k">KoneKT
+      <span class="brand-k">Kone</span>KT
     </a>
 
     <button class="navbar-toggler border-0 text-white" type="button" data-bs-toggle="collapse" data-bs-target="#konektNavbar" aria-controls="konektNavbar" aria-expanded="false" aria-label="Toggle navigation">

@@ -303,7 +303,7 @@ function getInitials($first, $last) {
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     // Status update via AJAX
-    document.querySelectorAll('.status-btn').forEach(btn => {
+    function handleStatusClick(btn) {
       btn.addEventListener('click', async () => {
         const appId = btn.dataset.id;
         const newStatus = btn.dataset.status;
@@ -341,8 +341,6 @@ function getInitials($first, $last) {
                 <button class="btn btn-konekt-success status-btn" data-id="${appId}" data-status="offered"><i class="bi bi-trophy"></i> Offer</button>
                 <button class="btn btn-konekt-danger status-btn" data-id="${appId}" data-status="rejected"><i class="bi bi-x-circle"></i> Reject</button>
               `;
-              // Re-attach handlers
-              actionsDiv.querySelectorAll('.status-btn').forEach(b => b.addEventListener('click', arguments.callee));
             } else if (newStatus === 'interview') {
               actionsDiv.innerHTML = `
                 <button class="btn btn-konekt-success status-btn" data-id="${appId}" data-status="offered"><i class="bi bi-trophy"></i> Offer</button>
@@ -351,7 +349,7 @@ function getInitials($first, $last) {
             }
             // Re-bind new buttons
             actionsDiv.querySelectorAll('.status-btn').forEach(newBtn => {
-              newBtn.addEventListener('click', arguments.callee);
+              handleStatusClick(newBtn);
             });
           } else {
             alert(data.message || 'Action failed.');
@@ -364,6 +362,10 @@ function getInitials($first, $last) {
           btn.innerHTML = originalText;
         }
       });
+    }
+
+    document.querySelectorAll('.status-btn').forEach(btn => {
+      handleStatusClick(btn);
     });
   </script>
 </body>

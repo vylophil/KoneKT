@@ -141,7 +141,7 @@ if ($isLoggedIn && !empty($jobs)) {
 
     <!-- Results -->
     <div class="mb-3">
-      <p class="text-secondary small"><?= $total ?> job<?= $total !== 1 ? 's' : '' ?> found<?= $keyword ? " for \"{$keyword}\"" : '' ?></p>
+      <p class="text-secondary small"><?= $total ?> job<?= $total !== 1 ? 's' : '' ?> found<?= $keyword ? ' for "' . htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') . '"' : '' ?></p>
     </div>
 
     <?php if (empty($jobs)): ?>
