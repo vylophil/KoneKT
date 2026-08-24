@@ -20,16 +20,22 @@ $db = getDB();
 
 // Load existing preferences from profile
 $profile = null;
+$skills = [];
+$selectedSkillIds = [];
 try {
   $stmt = $db->prepare('SELECT location, industry FROM profiles WHERE user_id = :uid');
   $stmt->execute([':uid' => $_SESSION['user_id']]);
   $profile = $stmt->fetch();
+  $skills = $db->query('SELECT id, name, category FROM skills ORDER BY category, name')->fetchAll();
+  $stmt = $db->prepare('SELECT skill_id FROM user_skills WHERE user_id = :uid');
+  $stmt->execute([':uid' => $_SESSION['user_id']]);
+  $selectedSkillIds = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
 } catch (Throwable $e) {}
 
 // Handle POST — save preferences & trigger matching
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $degree       = trim($_POST['degree'] ?? '');
-  $primarySkill = trim($_POST['primary_skill'] ?? '');
+  $primarySkills = array_values(array_unique(array_filter(array_map('intval', $_POST['primary_skills'] ?? []))));
   $fields       = $_POST['fields'] ?? [];
   $location     = trim($_POST['location'] ?? '');
   $workSetup    = trim($_POST['work_setup'] ?? '');
@@ -44,6 +50,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       ':location' => $location,
       ':uid'      => $_SESSION['user_id'],
     ]);
+
+    // Keep selected primary skills in the same catalog used by the matcher.
+    if (!empty($primarySkills)) {
+      $validSkillStmt = $db->prepare('SELECT id FROM skills WHERE id = :id');
+      $skillStmt = $db->prepare('
+        INSERT INTO user_skills (user_id, skill_id, proficiency_level)
+        VALUES (:uid, :skill_id, \'intermediate\')
+        ON DUPLICATE KEY UPDATE proficiency_level = proficiency_level
+      ');
+      foreach ($primarySkills as $skillId) {
+        $validSkillStmt->execute([':id' => $skillId]);
+        if ($validSkillStmt->fetchColumn()) {
+          $skillStmt->execute([':uid' => $_SESSION['user_id'], ':skill_id' => $skillId]);
+        }
+      }
+    }
 
     // Trigger matchmaking for this user
     // We call compute_matches logic inline rather than via HTTP
@@ -191,13 +213,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </div>
 
               <div class="col-md-6">
-                <label class="form-label fw-semibold">Primary Skill Category</label>
-                <select class="form-select" name="primary_skill">
-                  <option selected>Database Admin & SQL</option>
-                  <option>Network & Systems Admin</option>
-                  <option>Software Development</option>
-                  <option>Data Analysis & Excel</option>
+                <label class="form-label fw-semibold">Primary Skills</label>
+                <select class="form-select" name="primary_skills[]" multiple size="6">
+                  <?php foreach ($skills as $skill): ?>
+                    <option value="<?= $skill['id'] ?>" <?= in_array((int) $skill['id'], $selectedSkillIds, true) ? 'selected' : '' ?>>
+                      <?= htmlspecialchars($skill['name']) ?> (<?= htmlspecialchars($skill['category']) ?>)
+                    </option>
+                  <?php endforeach; ?>
                 </select>
+                <div class="form-text">Select every skill you want the matcher to consider.</div>
               </div>
             </div>
           </div>

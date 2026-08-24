@@ -44,6 +44,7 @@ try {
 $selectedJobId = isset($_GET['job_id']) ? (int) $_GET['job_id'] : 0;
 $searchQuery   = trim($_GET['search'] ?? '');
 $statusFilter  = trim($_GET['status'] ?? '');
+$viewMode      = ($_GET['view'] ?? 'applications') === 'matches' ? 'matches' : 'applications';
 
 // Build applicant query
 $applicants = [];
@@ -64,6 +65,35 @@ if ($selectedJobId || $searchQuery) {
           $selectedJobTitle = $j['title'];
           break;
         }
+      }
+
+      // A match is useful before a candidate applies, so keep this separate from applications.
+      if ($viewMode === 'matches' && $selectedJobId) {
+        try {
+          $stmt = $db->prepare('SELECT jp.title FROM job_postings jp WHERE jp.id = :jid AND jp.company_id = :cid');
+          $stmt->execute([':jid' => $selectedJobId, ':cid' => $companyId]);
+          $selectedJobTitle = (string) $stmt->fetchColumn();
+          if ($selectedJobTitle === '') {
+            $selectedJobId = 0;
+          } else {
+            $stmt = $db->prepare('
+              SELECT NULL AS app_id, ja.status, ja.cover_letter, ja.resume_url, ja.applied_at,
+                     jm.job_id, jp.title AS job_title, jm.match_score,
+                     u.id AS user_id, u.first_name, u.last_name, u.email,
+                     p.headline, p.location AS applicant_location, p.years_of_experience
+              FROM job_matches jm
+              JOIN job_postings jp ON jp.id = jm.job_id AND jp.company_id = :cid
+              JOIN users u ON u.id = jm.user_id AND u.is_active = 1
+              LEFT JOIN profiles p ON p.user_id = u.id
+              LEFT JOIN job_applications ja ON ja.job_id = jm.job_id AND ja.user_id = jm.user_id
+              WHERE jm.job_id = :jid
+              ORDER BY jm.match_score DESC
+              LIMIT 50
+            ');
+            $stmt->execute([':cid' => $companyId, ':jid' => $selectedJobId]);
+            $applicants = $stmt->fetchAll();
+          }
+        } catch (Throwable $e) {}
       }
     }
 
@@ -148,8 +178,24 @@ function getInitials($first, $last) {
 
     <div class="mb-4">
       <h1 class="h3 mb-1">Applicant Management</h1>
-      <p class="text-secondary mb-0">Search by role, filter by status, and manage applicants for <?= htmlspecialchars($company['name']) ?>.</p>
+      <p class="text-secondary mb-0">Review applications and discover strong matches for <?= htmlspecialchars($company['name']) ?>.</p>
     </div>
+
+    <?php if ($selectedJobId): ?>
+      <div class="d-flex gap-2 mb-4">
+        <a href="employer_applicants.php?job_id=<?= $selectedJobId ?>" class="btn <?= $viewMode === 'applications' ? 'btn-konekt-primary' : 'btn-outline-primary' ?>">
+          <i class="bi bi-inbox me-1"></i> Applications
+        </a>
+        <a href="employer_applicants.php?job_id=<?= $selectedJobId ?>&view=matches" class="btn <?= $viewMode === 'matches' ? 'btn-konekt-primary' : 'btn-outline-primary' ?>">
+          <i class="bi bi-stars me-1"></i> Matching Candidates
+        </a>
+        <?php if ($viewMode === 'matches'): ?>
+          <button type="button" class="btn btn-outline-secondary" id="refreshMatches" data-job-id="<?= $selectedJobId ?>">
+            <i class="bi bi-arrow-clockwise me-1"></i> Refresh Scores
+          </button>
+        <?php endif; ?>
+      </div>
+    <?php endif; ?>
 
     <!-- Search & Filter Bar -->
     <div class="konekt-card p-4 mb-4">
@@ -200,6 +246,7 @@ function getInitials($first, $last) {
       <p class="text-secondary small mb-0">
         <strong><?= count($applicants) ?></strong> applicant<?= count($applicants) !== 1 ? 's' : '' ?>
         <?= $selectedJobTitle ? ' for "' . htmlspecialchars($selectedJobTitle) . '"' : '' ?>
+        <?= $viewMode === 'matches' ? ' ranked by match score' : '' ?>
         <?= $searchQuery ? ' matching "' . htmlspecialchars($searchQuery) . '"' : '' ?>
       </p>
     </div>
@@ -239,7 +286,11 @@ function getInitials($first, $last) {
                 <?php if ($app['match_score']): ?>
                   <span class="match-chip"><i class="bi bi-stars"></i> <?= round($app['match_score']) ?>%</span>
                 <?php endif; ?>
-                <span class="status-badge <?= $app['status'] ?>" id="status-<?= $app['app_id'] ?>"><?= ucfirst($app['status']) ?></span>
+                <?php if ($app['status']): ?>
+                  <span class="status-badge <?= $app['status'] ?>" id="status-<?= $app['app_id'] ?>"><?= ucfirst($app['status']) ?></span>
+                <?php else: ?>
+                  <span class="status-badge reviewing">Matched</span>
+                <?php endif; ?>
               </div>
             </div>
 
@@ -249,7 +300,7 @@ function getInitials($first, $last) {
               <?php if ($app['years_of_experience']): ?>
                 · <?= $app['years_of_experience'] ?> yr<?= $app['years_of_experience'] != 1 ? 's' : '' ?> exp
               <?php endif; ?>
-              · <?= date('M j, Y', strtotime($app['applied_at'])) ?>
+              <?php if ($app['applied_at']): ?> · <?= date('M j, Y', strtotime($app['applied_at'])) ?><?php else: ?> · Has not applied<?php endif; ?>
             </p>
 
             <!-- Resume link -->
@@ -261,7 +312,9 @@ function getInitials($first, $last) {
 
             <!-- Action Buttons -->
             <div class="action-btn-group mt-2" id="actions-<?= $app['app_id'] ?>">
-              <?php if (in_array($app['status'], ['pending', 'reviewing'])): ?>
+              <?php if (!$app['status']): ?>
+                <a href="network.php?user_id=<?= $app['user_id'] ?>" class="btn btn-outline-primary"><i class="bi bi-person me-1"></i> Contact Candidate</a>
+              <?php elseif (in_array($app['status'], ['pending', 'reviewing'])): ?>
                 <button class="btn btn-outline-primary status-btn" data-id="<?= $app['app_id'] ?>" data-status="shortlisted">
                   <i class="bi bi-bookmark-check"></i> Shortlist
                 </button>
@@ -302,6 +355,28 @@ function getInitials($first, $last) {
   <?php include 'includes/footer.php'; ?>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
+    const refreshMatches = document.getElementById('refreshMatches');
+    if (refreshMatches) {
+      refreshMatches.addEventListener('click', async () => {
+        refreshMatches.disabled = true;
+        refreshMatches.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Refreshing';
+        try {
+          const response = await fetch('api/matchmaking/compute_matches.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ job_id: Number(refreshMatches.dataset.jobId) })
+          });
+          const result = await response.json();
+          if (!result.success) throw new Error(result.message || 'Unable to refresh scores.');
+          window.location.reload();
+        } catch (error) {
+          alert(error.message);
+          refreshMatches.disabled = false;
+          refreshMatches.innerHTML = '<i class="bi bi-arrow-clockwise me-1"></i> Refresh Scores';
+        }
+      });
+    }
+
     // Status update via AJAX
     function handleStatusClick(btn) {
       btn.addEventListener('click', async () => {

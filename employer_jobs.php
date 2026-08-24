@@ -68,6 +68,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $saveMsg = 'Failed to post job: ' . $e->getMessage();
       }
     }
+  } elseif ($action === 'update') {
+    $jobId       = (int)($_POST['job_id'] ?? 0);
+    $title       = trim($_POST['title'] ?? '');
+    $description = trim($_POST['description'] ?? '');
+    $requirements = trim($_POST['requirements'] ?? '');
+    $location    = trim($_POST['location'] ?? '');
+    $jobType     = $_POST['job_type'] ?? 'full_time';
+    $workArr     = $_POST['work_arrangement'] ?? 'on_site';
+
+    if ($jobId < 1 || mb_strlen($title) < 3 || mb_strlen($description) < 10) {
+      $saveMsg = 'Title must be at least 3 characters and description at least 10 characters.';
+    } else {
+      try {
+        $stmt = $db->prepare('UPDATE job_postings SET title = :title, description = :description, requirements = :requirements, location = :location, job_type = :job_type, work_arrangement = :work_arrangement WHERE id = :id AND employer_id = :eid');
+        $stmt->execute([
+          ':title' => $title, ':description' => $description, ':requirements' => $requirements,
+          ':location' => $location, ':job_type' => $jobType, ':work_arrangement' => $workArr,
+          ':id' => $jobId, ':eid' => $_SESSION['user_id'],
+        ]);
+        $saveOk = true;
+        $saveMsg = 'Job posting updated successfully.';
+      } catch (Throwable $e) {
+        $saveMsg = 'Failed to update job posting.';
+      }
+    }
   } elseif ($action === 'toggle') {
     $jobId = (int)($_POST['job_id'] ?? 0);
     $newActive = (int)($_POST['new_active'] ?? 0);
@@ -247,6 +272,12 @@ try {
             <a href="employer_applicants.php?job_id=<?= $job['id'] ?>" class="match-chip text-decoration-none">
               <i class="bi bi-people"></i> <?= $job['app_count'] ?> applicant<?= $job['app_count'] != 1 ? 's' : '' ?>
             </a>
+            <a href="employer_applicants.php?job_id=<?= $job['id'] ?>&view=matches" class="d-block small mt-2">
+              <i class="bi bi-stars me-1"></i> See matching candidates
+            </a>
+            <a href="#editJob<?= $job['id'] ?>" data-bs-toggle="collapse" class="btn btn-sm btn-outline-primary mt-2">
+              <i class="bi bi-pencil"></i> Edit
+            </a>
             <form method="post" class="mt-2 d-inline">
               <input type="hidden" name="action" value="toggle">
               <input type="hidden" name="job_id" value="<?= $job['id'] ?>">
@@ -256,6 +287,49 @@ try {
               </button>
             </form>
           </div>
+        </div>
+        <div class="collapse mt-4" id="editJob<?= $job['id'] ?>">
+          <hr>
+          <h3 class="h6 mb-3">Edit job posting</h3>
+          <form method="post" class="row g-3">
+            <input type="hidden" name="action" value="update">
+            <input type="hidden" name="job_id" value="<?= $job['id'] ?>">
+            <div class="col-md-8">
+              <label class="form-label small fw-semibold">Job Title</label>
+              <input type="text" name="title" class="form-control" value="<?= htmlspecialchars($job['title']) ?>" required>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label small fw-semibold">Job Type</label>
+              <select name="job_type" class="form-select">
+                <?php foreach (['full_time' => 'Full Time', 'part_time' => 'Part Time', 'contract' => 'Contract', 'internship' => 'Internship', 'freelance' => 'Freelance'] as $value => $label): ?>
+                  <option value="<?= $value ?>" <?= $job['job_type'] === $value ? 'selected' : '' ?>><?= $label ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label small fw-semibold">Description</label>
+              <textarea name="description" class="form-control" rows="3" required><?= htmlspecialchars($job['description']) ?></textarea>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label small fw-semibold">Requirements</label>
+              <textarea name="requirements" class="form-control" rows="2"><?= htmlspecialchars($job['requirements'] ?? '') ?></textarea>
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold">Location</label>
+              <input type="text" name="location" class="form-control" value="<?= htmlspecialchars($job['location'] ?? '') ?>">
+            </div>
+            <div class="col-md-3">
+              <label class="form-label small fw-semibold">Work Arrangement</label>
+              <select name="work_arrangement" class="form-select">
+                <?php foreach (['on_site' => 'On-site', 'remote' => 'Remote', 'hybrid' => 'Hybrid'] as $value => $label): ?>
+                  <option value="<?= $value ?>" <?= $job['work_arrangement'] === $value ? 'selected' : '' ?>><?= $label ?></option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+            <div class="col-12">
+              <button type="submit" class="btn btn-konekt-primary"><i class="bi bi-check-lg me-1"></i> Save Changes</button>
+            </div>
+          </form>
         </div>
       </div>
       <?php endforeach; ?>
