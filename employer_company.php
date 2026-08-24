@@ -128,6 +128,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           </form>
         </div>
 
+        <div class="konekt-card danger-zone p-4 mt-4">
+          <div class="d-flex gap-3 align-items-start">
+            <i class="bi bi-exclamation-triangle text-danger fs-4"></i>
+            <div class="flex-grow-1">
+              <h2 class="h6 mb-1">Delete employer account</h2>
+              <p class="small text-secondary mb-3">This permanently removes your company, job postings, applications, and profile data.</p>
+              <form method="post" action="api/auth/delete_profile.php" onsubmit="return confirm('Delete your employer account permanently? This cannot be undone.');">
+                <button type="submit" class="btn btn-outline-danger btn-sm">
+                  <i class="bi bi-trash3 me-1"></i> Delete account
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   </main>

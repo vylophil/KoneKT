@@ -2,17 +2,18 @@
    KoneKT Theme — Design Tokens
    ============================================ */
 :root {
-  --ink-navy: #1B2A4A;
-  --ink-navy-soft: #24365C;
-  --signal-blue: #2F6FED;
-  --signal-blue-dark: #1E54C4;
-  --ember-gold: #F5A524;
-  --ember-gold-soft: #FFF3DE;
-  --mist: #F6F7FB;
+  --ink-navy: #17233f;
+  --ink-navy-soft: #25365c;
+  --signal-blue: #2878d4;
+  --signal-blue-dark: #1c5da9;
+  --ember-gold: #f2a93b;
+  --ember-gold-soft: #fff1d8;
+  --mist: #f4f7f8;
   --slate: #5B6478;
   --slate-light: #9AA2B4;
   --white: #FFFFFF;
-  --line: #E4E7EF;
+  --line: #dce4e8;
+  --coral-soft: #fff0eb;
 
   --success-green: #22C55E;
   --success-green-soft: #DCFCE7;
@@ -27,14 +28,15 @@
   --font-body: 'Inter', sans-serif;
   --font-mono: 'JetBrains Mono', monospace;
 
-  --radius: 10px;
-  --shadow-sm: 0 1px 2px rgba(27, 42, 74, 0.06);
-  --shadow-md: 0 8px 24px rgba(27, 42, 74, 0.08);
+  --radius: 8px;
+  --shadow-sm: 0 2px 8px rgba(23, 35, 63, 0.06);
+  --shadow-md: 0 14px 32px rgba(23, 35, 63, 0.11);
 }
 
 body {
   font-family: var(--font-body);
   background-color: var(--mist);
+  background-image: linear-gradient(135deg, rgba(223, 243, 239, 0.45), transparent 32%);
   color: var(--ink-navy);
 }
 
@@ -57,8 +59,8 @@ a:hover {
    Navbar
    ============================================ */
 .konekt-navbar {
-  background-color: var(--ink-navy);
-  padding: 0.65rem 0;
+  background: linear-gradient(110deg, var(--ink-navy), var(--ink-navy-soft));
+  padding: 0.8rem 0;
   box-shadow: var(--shadow-sm);
 }
 
@@ -257,6 +259,55 @@ a:hover {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow-sm);
+}
+
+.konekt-card:hover {
+  box-shadow: var(--shadow-md);
+}
+
+.skill-toolbar {
+  background: var(--mist);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 0.75rem;
+}
+
+.skill-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 0.6rem;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 0.75rem 0.25rem 0.25rem;
+}
+
+.skill-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.55rem;
+  padding: 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--white);
+  cursor: pointer;
+  font-size: 0.86rem;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.skill-option:hover,
+.skill-option:has(input:checked) {
+  border-color: var(--signal-blue);
+  background: var(--info-blue-soft);
+}
+
+.skill-option input {
+  margin-top: 0.18rem;
+  accent-color: var(--signal-blue);
+}
+
+.danger-zone {
+  border: 1px solid #f2c8bd;
+  background: var(--coral-soft);
 }
 
 /* ============================================

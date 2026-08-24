@@ -17,6 +17,17 @@ $saveMsg = '';
 $saveOk  = false;
 
 $db = getDB();
+$currentUserId = (int) $_SESSION['user_id'];
+
+// A database reset can leave the browser session pointing at a deleted user.
+$userStmt = $db->prepare('SELECT id FROM users WHERE id = :uid AND is_active = 1');
+$userStmt->execute([':uid' => $currentUserId]);
+if (!$userStmt->fetchColumn()) {
+  $_SESSION = [];
+  session_destroy();
+  header('Location: login.php');
+  exit;
+}
 
 // Load existing preferences from profile
 $profile = null;
@@ -203,25 +214,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <div class="row g-3">
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Degree / Field of Study</label>
-                <select class="form-select" name="degree">
-                  <option selected>BS Information Technology (BSIT)</option>
-                  <option>BS Computer Science (BSCS)</option>
-                  <option>BS Business Administration (BSBA)</option>
-                  <option>BS Nursing / Allied Health</option>
-                  <option>BS Civil Engineering</option>
+                <select class="form-select" name="degree" id="degreeSelect">
+                  <option value="BS Information Technology (BSIT)" data-course="technology" selected>BS Information Technology (BSIT)</option>
+                  <option value="BS Computer Science (BSCS)" data-course="technology">BS Computer Science (BSCS)</option>
+                  <option value="BS Business Administration (BSBA)" data-course="business">BS Business Administration (BSBA)</option>
+                  <option value="BS Nursing / Allied Health" data-course="health">BS Nursing / Allied Health</option>
+                  <option value="BS Civil Engineering" data-course="engineering">BS Civil Engineering</option>
+                  <option value="BA Communication / Media" data-course="creative">BA Communication / Media</option>
+                  <option value="BS Hospitality Management" data-course="hospitality">BS Hospitality Management</option>
+                  <option value="BS Agriculture" data-course="agriculture">BS Agriculture</option>
                 </select>
               </div>
 
               <div class="col-md-6">
                 <label class="form-label fw-semibold">Primary Skills</label>
-                <select class="form-select" name="primary_skills[]" multiple size="6">
+                <div class="skill-toolbar">
+                  <div class="input-group input-group-sm mb-2">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input type="search" class="form-control" id="skillSearch" placeholder="Search skills">
+                  </div>
+                  <div class="d-flex justify-content-between align-items-center small">
+                    <span class="text-secondary"><span id="skillCount"><?= count($selectedSkillIds) ?></span> selected</span>
+                    <button type="button" class="btn btn-link btn-sm p-0" id="clearSkills">Clear all</button>
+                  </div>
+                </div>
+                <div class="skill-grid" id="skillGrid">
                   <?php foreach ($skills as $skill): ?>
-                    <option value="<?= $skill['id'] ?>" <?= in_array((int) $skill['id'], $selectedSkillIds, true) ? 'selected' : '' ?>>
-                      <?= htmlspecialchars($skill['name']) ?> (<?= htmlspecialchars($skill['category']) ?>)
-                    </option>
+                    <label class="skill-option" data-skill-name="<?= htmlspecialchars(strtolower($skill['name'] . ' ' . $skill['category'])) ?>">
+                      <input type="checkbox" name="primary_skills[]" value="<?= $skill['id'] ?>" <?= in_array((int) $skill['id'], $selectedSkillIds, true) ? 'checked' : '' ?>>
+                      <span><?= htmlspecialchars($skill['name']) ?><small class="d-block text-secondary"><?= htmlspecialchars($skill['category']) ?></small></span>
+                    </label>
                   <?php endforeach; ?>
-                </select>
-                <div class="form-text">Select every skill you want the matcher to consider.</div>
+                </div>
+                <div class="form-text">Choose skills from your course and adjacent fields. These power your job matches.</div>
               </div>
             </div>
           </div>
@@ -297,6 +322,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <!-- Shared Footer -->
   <?php if (file_exists('includes/footer.php')) include 'includes/footer.php'; ?>
 
+  <script>
+    const degreeSelect = document.getElementById('degreeSelect');
+    const skillSearch = document.getElementById('skillSearch');
+    const skillCount = document.getElementById('skillCount');
+    const skillOptions = [...document.querySelectorAll('.skill-option')];
+    const courseCategories = {
+      technology: ['programming', 'web development', 'databases', 'cloud & devops', 'data & ai', 'technical'],
+      business: ['business', 'data & ai', 'communication'],
+      health: ['healthcare', 'science', 'business', 'communication'],
+      engineering: ['engineering', 'programming', 'technical', 'data & ai', 'business'],
+      creative: ['design', 'communication', 'business', 'web development'],
+      hospitality: ['hospitality', 'business', 'communication', 'marketing'],
+      agriculture: ['agriculture', 'science', 'business', 'data & ai']
+    };
+
+    function filterSkills() {
+      const course = degreeSelect.selectedOptions[0].dataset.course;
+      const query = skillSearch.value.trim().toLowerCase();
+      const categories = courseCategories[course] || [];
+      skillOptions.forEach((option) => {
+        const text = option.dataset.skillName;
+        const category = text.split(' ').slice(1).join(' ');
+        const matchesCourse = categories.some((item) => text.includes(item));
+        option.hidden = !matchesCourse || (query && !text.includes(query));
+      });
+      skillCount.textContent = document.querySelectorAll('input[name="primary_skills[]"]:checked').length;
+    }
+
+    degreeSelect.addEventListener('change', filterSkills);
+    skillSearch.addEventListener('input', filterSkills);
+    document.querySelectorAll('input[name="primary_skills[]"]').forEach((input) => input.addEventListener('change', filterSkills));
+    document.getElementById('clearSkills').addEventListener('click', () => {
+      document.querySelectorAll('input[name="primary_skills[]"]').forEach((input) => { input.checked = false; });
+      filterSkills();
+    });
+    filterSkills();
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

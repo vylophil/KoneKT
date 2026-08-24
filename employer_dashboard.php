@@ -179,6 +179,24 @@ $displayName = trim(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_nam
       </div>
     </div>
     <?php endif; ?>
+
+    <div class="row justify-content-end mt-4">
+      <div class="col-md-4">
+        <div class="konekt-card p-4">
+          <h2 class="h6 mb-3">Account</h2>
+          <form method="post" action="api/auth/logout.php" class="mb-2">
+            <button type="submit" class="btn btn-konekt-outline btn-sm w-100">
+              <i class="bi bi-box-arrow-right me-1"></i> Log out
+            </button>
+          </form>
+          <form method="post" action="api/auth/delete_profile.php" onsubmit="return confirm('Delete your employer account permanently? This cannot be undone.');">
+            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+              <i class="bi bi-trash3 me-1"></i> Delete account
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   </main>
 
   <?php include 'includes/footer.php'; ?>

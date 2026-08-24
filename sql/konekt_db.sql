@@ -316,7 +316,7 @@ CREATE TABLE profile_views (
 -- ============================================================
 -- SEED DATA — Common skills catalog
 -- ============================================================
-INSERT INTO skills (name, category) VALUES
+INSERT IGNORE INTO skills (name, category) VALUES
     -- Programming Languages
     ('PHP', 'Programming'),
     ('JavaScript', 'Programming'),
@@ -401,3 +401,37 @@ INSERT INTO skills (name, category) VALUES
     ('Embedded Systems', 'Technical'),
     ('Quality Assurance', 'Technical'),
     ('Technical Writing', 'Technical');
+
+-- Additional cross-disciplinary skills for course-aware matching
+INSERT IGNORE INTO skills (name, category) VALUES
+    ('Figma Prototyping', 'Design'),
+    ('Content Strategy', 'Communication'),
+    ('Public Speaking', 'Communication'),
+    ('Technical Presentation', 'Communication'),
+    ('Financial Modeling', 'Business'),
+    ('Bookkeeping', 'Business'),
+    ('Customer Relationship Management', 'Business'),
+    ('Digital Marketing', 'Marketing'),
+    ('Recruitment', 'Business'),
+    ('Project Coordination', 'Business'),
+    ('Data Privacy', 'Technical'),
+    ('IT Support', 'Technical'),
+    ('Network Security', 'Technical'),
+    ('Data Engineering', 'Data & AI'),
+    ('Statistics', 'Data & AI'),
+    ('Electronic Health Records', 'Healthcare'),
+    ('Medical Terminology', 'Healthcare'),
+    ('Patient Care', 'Healthcare'),
+    ('Health Informatics', 'Healthcare'),
+    ('CAD', 'Engineering'),
+    ('AutoCAD', 'Engineering'),
+    ('Construction Planning', 'Engineering'),
+    ('Structural Analysis', 'Engineering'),
+    ('Quality Control', 'Engineering'),
+    ('Food Safety', 'Hospitality'),
+    ('Event Coordination', 'Hospitality'),
+    ('Hotel Operations', 'Hospitality'),
+    ('Agricultural Technology', 'Agriculture'),
+    ('Crop Management', 'Agriculture'),
+    ('Sustainable Agriculture', 'Agriculture'),
+    ('GIS Mapping', 'Agriculture');
