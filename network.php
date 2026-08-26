@@ -163,11 +163,11 @@ function timeAgo($datetime) {
             <input type="text"
                    id="networkSearchInput"
                    class="form-control"
-                   placeholder="Search people or companies to connect with..."
+                   placeholder="Search people to connect with..."
                    autocomplete="off"
                    spellcheck="false"
                    style="padding-left:2.4rem;border-radius:24px;border-color:var(--line);"
-                   aria-label="Search people and companies">
+                   aria-label="Search people">
           </div>
         </div>
       </div>

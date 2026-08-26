@@ -1,5 +1,5 @@
 // ============================================================
-// KONEKT — Network Search (People & Companies)
+// KONEKT — Network Search (People Only)
 // ============================================================
 // Used on network.php — searches via /api/search/global_search.php
 // Debounced input, keyboard navigation, click-outside-to-close.
@@ -50,10 +50,9 @@
 
   // ── Render Results ─────────────────────────────────────────
   function renderResults(data, query) {
-    const people    = data.people || [];
-    const companies = data.companies || [];
+    const people = data.people || [];
 
-    if (people.length === 0 && companies.length === 0) {
+    if (people.length === 0) {
       results.innerHTML = '';
       empty.style.display = 'block';
       loading.style.display = 'none';
@@ -66,45 +65,22 @@
     let html = '';
 
     // People section
-    if (people.length > 0) {
-      html += '<div class="konekt-search-category"><i class="bi bi-people me-1"></i> People</div>';
-      people.forEach(p => {
-        const initials = getInitials(p.first_name, p.last_name).toUpperCase();
-        const name = highlightMatch(p.first_name + ' ' + p.last_name, query);
-        const sub  = p.headline ? escapeHtml(p.headline) : (p.location ? escapeHtml(p.location) : 'KoneKT User');
-        const badge = `<span class="konekt-search-item-badge role-${escapeHtml(p.role)}">${roleBadgeLabel(p.role)}</span>`;
+    people.forEach(p => {
+      const initials = getInitials(p.first_name, p.last_name).toUpperCase();
+      const name = highlightMatch(p.first_name + ' ' + p.last_name, query);
+      const sub  = p.headline ? escapeHtml(p.headline) : (p.location ? escapeHtml(p.location) : 'KoneKT User');
+      const badge = `<span class="konekt-search-item-badge role-${escapeHtml(p.role)}">${roleBadgeLabel(p.role)}</span>`;
 
-        html += `
-          <a href="network.php?user_id=${p.id}" class="konekt-search-item" data-type="person" data-id="${p.id}">
-            <div class="konekt-search-avatar">${initials}</div>
-            <div class="konekt-search-item-info">
-              <div class="konekt-search-item-name">${name}</div>
-              <div class="konekt-search-item-sub">${sub}</div>
-            </div>
-            ${badge}
-          </a>`;
-      });
-    }
-
-    // Companies section
-    if (companies.length > 0) {
-      html += '<div class="konekt-search-category"><i class="bi bi-building me-1"></i> Companies</div>';
-      companies.forEach(c => {
-        const initials = (c.name || '').substring(0, 2).toUpperCase();
-        const name = highlightMatch(c.name, query);
-        const sub  = [c.industry, c.location].filter(Boolean).map(escapeHtml).join(' · ') || 'Company';
-
-        html += `
-          <a href="find_jobs.php?keyword=${encodeURIComponent(c.name)}" class="konekt-search-item" data-type="company" data-id="${c.id}">
-            <div class="konekt-search-avatar company-avatar">${initials}</div>
-            <div class="konekt-search-item-info">
-              <div class="konekt-search-item-name">${name}</div>
-              <div class="konekt-search-item-sub">${sub}</div>
-            </div>
-            <span class="konekt-search-item-badge badge-company">Company</span>
-          </a>`;
-      });
-    }
+      html += `
+        <a href="network.php?user_id=${p.id}" class="konekt-search-item" data-type="person" data-id="${p.id}">
+          <div class="konekt-search-avatar">${initials}</div>
+          <div class="konekt-search-item-info">
+            <div class="konekt-search-item-name">${name}</div>
+            <div class="konekt-search-item-sub">${sub}</div>
+          </div>
+          ${badge}
+        </a>`;
+    });
 
     results.innerHTML = html;
     showDropdown();
