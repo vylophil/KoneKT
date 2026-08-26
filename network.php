@@ -153,6 +153,39 @@ function timeAgo($datetime) {
   <?php if (file_exists('includes/navbar.php')) include 'includes/navbar.php'; ?>
 
   <main class="container py-4">
+
+    <!-- Search People & Companies -->
+    <div class="mb-4 position-relative" id="networkSearchWrap">
+      <div class="konekt-card p-3">
+        <div class="d-flex align-items-center gap-3">
+          <div class="flex-grow-1 position-relative">
+            <i class="bi bi-search" style="position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--slate-light);font-size:0.9rem;"></i>
+            <input type="text"
+                   id="networkSearchInput"
+                   class="form-control"
+                   placeholder="Search people or companies to connect with..."
+                   autocomplete="off"
+                   spellcheck="false"
+                   style="padding-left:2.4rem;border-radius:24px;border-color:var(--line);"
+                   aria-label="Search people and companies">
+          </div>
+        </div>
+      </div>
+
+      <!-- Search Results Dropdown -->
+      <div class="konekt-search-dropdown" id="networkSearchDropdown" style="display:none;">
+        <div id="networkSearchResults"></div>
+        <div id="networkSearchEmpty" style="display:none;" class="konekt-search-empty">
+          <i class="bi bi-search"></i>
+          <p>No results found</p>
+        </div>
+        <div id="networkSearchLoading" style="display:none;" class="konekt-search-loading">
+          <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+          <span>Searching...</span>
+        </div>
+      </div>
+    </div>
+
     <div class="row g-4">
 
       <!-- Left Panel: Conversations & Pending Connections -->
@@ -298,6 +331,7 @@ function timeAgo($datetime) {
     window.currentUserId = <?= json_encode($currentUserId, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT); ?>;
   </script>
   <script src="assets/js/messaging.js"></script>
+  <script src="assets/js/global-search.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
