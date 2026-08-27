@@ -1,38 +1,31 @@
 <?php
-// ============================================================
-// KONEKT — Upload Resume (PDF)
-// ============================================================
-// POST /api/profile/upload_resume.php
-//
-// Expects multipart/form-data with:
-//   - resume  (file, required, PDF only, max 10MB)
-// ============================================================
+// Upload Resume (PDF)
 
 require_once __DIR__ . '/../auth/session.php';
 
 requireMethod('POST');
 $user = requireRole('job_seeker');
 
-// --- Check file is present ---
+// Check file is present
 if (!isset($_FILES['resume'])) {
     jsonError('No resume file uploaded.', 400);
 }
 
 $file = $_FILES['resume'];
 
-// --- Validate file ---
+// Validate file
 $errors = validateFileUpload($file, ['application/pdf'], 10);
 if (!empty($errors)) {
     jsonError('Resume upload validation failed.', 422, $errors);
 }
 
-// --- Verify file extension (double check) ---
+// Verify file extension (double check)
 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 if ($ext !== 'pdf') {
     jsonError('Only PDF files are accepted.', 422);
 }
 
-// --- Generate unique filename ---
+// Generate unique filename
 $filename = 'resume_' . $user['id'] . '_' . time() . '.pdf';
 $uploadDir = __DIR__ . '/../../uploads/resumes/';
 
@@ -43,7 +36,7 @@ if (!is_dir($uploadDir)) {
 
 $destination = $uploadDir . $filename;
 
-// --- Delete old resume if exists ---
+// Delete old resume if exists
 $db = getDB();
 $stmt = $db->prepare('SELECT resume_url FROM profiles WHERE user_id = :user_id');
 $stmt->execute([':user_id' => $user['id']]);
@@ -56,12 +49,12 @@ if ($profile && $profile['resume_url']) {
     }
 }
 
-// --- Move uploaded file ---
+// Move uploaded file
 if (!move_uploaded_file($file['tmp_name'], $destination)) {
     jsonError('Failed to save the resume file.', 500);
 }
 
-// --- Update profile with resume URL ---
+// Update profile with resume URL
 $resumeUrl = 'uploads/resumes/' . $filename;
 $stmt = $db->prepare('UPDATE profiles SET resume_url = :resume_url WHERE user_id = :user_id');
 $stmt->execute([

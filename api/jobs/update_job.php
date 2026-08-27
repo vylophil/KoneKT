@@ -1,14 +1,10 @@
-<?php
-// ============================================================
-// KONEKT — Update Job Posting
-// ============================================================
+﻿<?php
+// K
 // PUT /api/jobs/update_job.php
-//
 // Body (JSON):
 //   - job_id  (int, required)
 //   - ...     (any fields from create_job, all optional)
 //   - skills  (array, optional — replaces all job skills)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -23,7 +19,7 @@ if (!isset($data['job_id']) || !validatePositiveInt($data['job_id'])) {
 $jobId = (int) $data['job_id'];
 $db = getDB();
 
-// --- Verify ownership ---
+// Verify ownership
 $stmt = $db->prepare('SELECT id FROM job_postings WHERE id = :id AND employer_id = :employer_id');
 $stmt->execute([':id' => $jobId, ':employer_id' => $user['id']]);
 
@@ -31,7 +27,7 @@ if (!$stmt->fetch()) {
     jsonError('Job posting not found or access denied.', 404);
 }
 
-// --- Build dynamic update ---
+// Build dynamic update
 $allowedFields = [
     'title', 'description', 'requirements', 'responsibilities',
     'location', 'job_type', 'work_arrangement',
@@ -65,7 +61,7 @@ try {
         $stmt->execute($params);
     }
 
-    // --- Replace skills if provided ---
+    // Replace skills if provided
     if (isset($data['skills']) && is_array($data['skills'])) {
         $db->prepare('DELETE FROM job_skills WHERE job_id = :job_id')
            ->execute([':job_id' => $jobId]);

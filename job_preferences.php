@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (empty($_SESSION['user_id'])) {
   header('Location: login.php');
@@ -174,25 +174,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Job Preferences · KoneKT</title>
 
-  <!-- Google Fonts -->
+  <?php // Google Fonts ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5 & Icons -->
+  <?php // Bootstrap 5 & Icons ?>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/theme.css" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Shared Navbar -->
+  <?php // Shared Navbar ?>
   <?php if (file_exists('includes/navbar.php')) include 'includes/navbar.php'; ?>
 
   <main class="container py-5">
     <div class="row justify-content-center">
       <div class="col-lg-8">
 
-        <!-- Header Section -->
+        <?php // Header Section ?>
         <div class="text-center mb-4">
           <span class="match-chip mb-2">
             <i class="bi bi-sliders"></i> Step 2 of 2
@@ -207,7 +207,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <form action="job_preferences.php" method="POST">
 
-          <!-- Card 1: Academic & Professional Profile -->
+          <?php // Card 1: Academic & Professional Profile ?>
           <div class="konekt-card p-4 mb-4">
             <h2 class="h6 mb-3 text-uppercase tracking-wider text-secondary">1. Academic Background</h2>
 
@@ -251,7 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
           </div>
 
-          <!-- Card 2: Target Industries Selection -->
+          <?php // Card 2: Target Industries Selection ?>
           <div class="konekt-card p-4 mb-4">
             <h2 class="h6 mb-3 text-uppercase tracking-wider text-secondary">2. Target Industries</h2>
             <p class="text-secondary small mb-3">Select industries where you want our matchmaking engine to find cross-field opportunities:</p>
@@ -284,7 +284,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
           </div>
 
-          <!-- Card 3: Preferred Location & Work Style -->
+          <?php // Card 3: Preferred Location & Work Style ?>
           <div class="konekt-card p-4 mb-4">
             <h2 class="h6 mb-3 text-uppercase tracking-wider text-secondary">3. Location & Availability</h2>
 
@@ -305,7 +305,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             </div>
           </div>
 
-          <!-- Actions -->
+          <?php // Actions ?>
           <div class="d-flex justify-content-between align-items-center">
             <a href="upload_resume.php" class="btn btn-konekt-outline px-4">&larr; Back to Resume Upload</a>
             <button type="submit" class="btn btn-konekt-primary px-4 py-2">
@@ -319,7 +319,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
   </main>
 
-  <!-- Shared Footer -->
+  <?php // Shared Footer ?>
   <?php if (file_exists('includes/footer.php')) include 'includes/footer.php'; ?>
 
   <script>

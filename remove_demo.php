@@ -1,27 +1,16 @@
 <?php
-// ============================================================
-// KONEKT — Demo Data Remover
-// ============================================================
-// Run via browser: http://localhost/.../remove_demo.php
-//
-// Removes ALL demo data by deleting users whose email matches
-// demo_*@konekt.test. Thanks to ON DELETE CASCADE foreign keys,
-// all related data (profiles, companies, jobs, applications,
-// connections, messages, etc.) is automatically removed.
-//
-// Safe to run multiple times.
-// ============================================================
+// Demo Data Remover
 
 require_once __DIR__ . '/api/config/database.php';
 
-// ── Output Helpers ───────────────────────────────────────────
+// Output helpers
 function out(string $msg, string $type = 'info'): void {
     $icons = ['ok' => '✅', 'skip' => '⏭️', 'info' => 'ℹ️', 'err' => '❌', 'warn' => '⚠️'];
     $icon = $icons[$type] ?? '';
     echo "<div style='margin:2px 0;padding:4px 8px;font-family:\"Segoe UI\",sans-serif;font-size:14px;'>{$icon} {$msg}</div>\n";
 }
 
-// ── Start ────────────────────────────────────────────────────
+// Start output
 echo '<!DOCTYPE html><html><head><title>KoneKT · Remove Demo Data</title>';
 echo '<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">';
 echo '<style>body{background:#0f0f23;color:#e0e0e0;padding:24px 32px;max-width:800px;margin:0 auto;}';
@@ -46,7 +35,7 @@ try {
     exit;
 }
 
-// ── Find demo users ──────────────────────────────────────────
+// Find demo users
 $stmt = $db->prepare("SELECT id, email, first_name, last_name, role FROM users WHERE email LIKE 'demo_%@konekt.test' ORDER BY role, first_name");
 $stmt->execute();
 $demoUsers = $stmt->fetchAll();
@@ -58,7 +47,7 @@ if (empty($demoUsers)) {
     exit;
 }
 
-// ── Confirmation step ────────────────────────────────────────
+// Confirmation step
 $confirmed = isset($_GET['confirm']) && $_GET['confirm'] === 'yes';
 
 if (!$confirmed) {
@@ -110,7 +99,7 @@ if (!$confirmed) {
     exit;
 }
 
-// ── Execute removal ──────────────────────────────────────────
+// Execute removal
 $startTime = microtime(true);
 
 try {

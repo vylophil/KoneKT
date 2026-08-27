@@ -1,14 +1,9 @@
-<?php
-// ============================================================
-// KONEKT — Save / Unsave a Job (Toggle)
-// ============================================================
+﻿<?php
+// K
 // POST /api/jobs/save_job.php
-//
 // Body (JSON):
 //   - job_id (int, required)
-//
 // Toggles the saved state: saves if not saved, removes if already saved.
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -23,7 +18,7 @@ if (!isset($data['job_id']) || !validatePositiveInt($data['job_id'])) {
 $jobId = (int) $data['job_id'];
 $db = getDB();
 
-// --- Check job exists ---
+// Check job exists
 $stmt = $db->prepare('SELECT id FROM job_postings WHERE id = :id');
 $stmt->execute([':id' => $jobId]);
 
@@ -31,7 +26,7 @@ if (!$stmt->fetch()) {
     jsonError('Job posting not found.', 404);
 }
 
-// --- Toggle save ---
+// Toggle save
 $stmt = $db->prepare('SELECT id FROM saved_jobs WHERE user_id = :user_id AND job_id = :job_id');
 $stmt->execute([':user_id' => $user['id'], ':job_id' => $jobId]);
 

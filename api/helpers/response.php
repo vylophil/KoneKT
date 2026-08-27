@@ -1,17 +1,8 @@
-<?php
-// ============================================================
-// KONEKT — Response Helper
-// ============================================================
+﻿<?php
+// K
 // Provides consistent JSON API responses with CORS support.
-// ============================================================
 
-/**
- * Send a JSON success response.
- *
- * @param mixed  $data    Response payload
- * @param string $message Human-readable message
- * @param int    $code    HTTP status code (default 200)
- */
+// Send a JSON success response.
 function jsonSuccess($data = null, string $message = 'Success', int $code = 200): void
 {
     setCorsHeaders();
@@ -31,13 +22,7 @@ function jsonSuccess($data = null, string $message = 'Success', int $code = 200)
     exit;
 }
 
-/**
- * Send a JSON error response.
- *
- * @param string $message Error message
- * @param int    $code    HTTP status code (default 400)
- * @param array  $errors  Optional detailed errors
- */
+// Send a JSON error response.
 function jsonError(string $message = 'An error occurred', int $code = 400, array $errors = []): void
 {
     setCorsHeaders();
@@ -57,9 +42,7 @@ function jsonError(string $message = 'An error occurred', int $code = 400, array
     exit;
 }
 
-/**
- * Set CORS headers for cross-origin requests.
- */
+// Set CORS headers for cross-origin requests.
 function setCorsHeaders(): void
 {
     header('Access-Control-Allow-Origin: *');
@@ -73,11 +56,7 @@ function setCorsHeaders(): void
     }
 }
 
-/**
- * Require specific HTTP method(s), return 405 if not matched.
- *
- * @param string|array $methods Allowed method(s), e.g. 'POST' or ['GET', 'POST']
- */
+// Require specific HTTP method(s), return 405 if not matched.
 function requireMethod($methods): void
 {
     if (is_string($methods)) {
@@ -92,11 +71,7 @@ function requireMethod($methods): void
     }
 }
 
-/**
- * Get the JSON body from the request.
- *
- * @return array Decoded JSON as associative array
- */
+// Get the JSON body from the request.
 function getJsonBody(): array
 {
     $raw = file_get_contents('php://input');

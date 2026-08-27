@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (empty($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'employer') {
   header('Location: login.php');
@@ -197,10 +197,10 @@ function getInitials($first, $last) {
       </div>
     <?php endif; ?>
 
-    <!-- Search & Filter Bar -->
+    <?php // Search & Filter Bar ?>
     <div class="konekt-card p-4 mb-4">
       <form method="GET" class="row g-3 align-items-end">
-        <!-- Role search -->
+        <?php // Role search ?>
         <div class="col-md-4">
           <label class="form-label fw-semibold small">Search by role or applicant</label>
           <div class="input-group">
@@ -209,7 +209,7 @@ function getInitials($first, $last) {
           </div>
         </div>
 
-        <!-- Job dropdown -->
+        <?php // Job dropdown ?>
         <div class="col-md-3">
           <label class="form-label fw-semibold small">Filter by Job Posting</label>
           <select name="job_id" class="form-select" id="jobFilter">
@@ -222,7 +222,7 @@ function getInitials($first, $last) {
           </select>
         </div>
 
-        <!-- Status filter -->
+        <?php // Status filter ?>
         <div class="col-md-3">
           <label class="form-label fw-semibold small">Status</label>
           <select name="status" class="form-select">
@@ -241,7 +241,7 @@ function getInitials($first, $last) {
       </form>
     </div>
 
-    <!-- Results Header -->
+    <?php // Results Header ?>
     <div class="d-flex justify-content-between align-items-center mb-3">
       <p class="text-secondary small mb-0">
         <strong><?= count($applicants) ?></strong> applicant<?= count($applicants) !== 1 ? 's' : '' ?>
@@ -251,7 +251,7 @@ function getInitials($first, $last) {
       </p>
     </div>
 
-    <!-- Applicants List -->
+    <?php // Applicants List ?>
     <?php if (empty($applicants)): ?>
       <div class="konekt-card p-5">
         <div class="empty-state">
@@ -270,12 +270,12 @@ function getInitials($first, $last) {
       <div class="konekt-card overflow-hidden">
         <?php foreach ($applicants as $app): ?>
         <div class="applicant-row d-flex align-items-start gap-3" id="app-<?= $app['app_id'] ?>">
-          <!-- Avatar -->
+          <?php // Avatar ?>
           <div class="applicant-avatar">
             <?= getInitials($app['first_name'], $app['last_name']) ?>
           </div>
 
-          <!-- Info -->
+          <?php // Info ?>
           <div class="flex-grow-1">
             <div class="d-flex justify-content-between align-items-start mb-1">
               <div>
@@ -303,14 +303,14 @@ function getInitials($first, $last) {
               <?php if ($app['applied_at']): ?> · <?= date('M j, Y', strtotime($app['applied_at'])) ?><?php else: ?> · Has not applied<?php endif; ?>
             </p>
 
-            <!-- Resume link -->
+            <?php // Resume link ?>
             <?php if ($app['resume_url']): ?>
               <a href="<?= htmlspecialchars($app['resume_url']) ?>" target="_blank" class="small me-3">
                 <i class="bi bi-file-earmark-pdf me-1"></i> View Resume
               </a>
             <?php endif; ?>
 
-            <!-- Action Buttons -->
+            <?php // Action Buttons ?>
             <div class="action-btn-group mt-2" id="actions-<?= $app['app_id'] ?>">
               <?php if (!$app['status']): ?>
                 <a href="network.php?user_id=<?= $app['user_id'] ?>" class="btn btn-outline-primary"><i class="bi bi-person me-1"></i> Contact Candidate</a>

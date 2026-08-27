@@ -1,19 +1,13 @@
-<?php
-// ============================================================
-// KONEKT — Demo Data Seeder
-// ============================================================
+﻿<?php
+// K
 // Run via browser: http://localhost/.../seed_demo.php
-//
 // Inserts realistic demo data: employers, companies, jobs,
 // job seekers, profiles, skills, connections, messages, and
 // job applications.
-//
 // All demo users use emails: demo_*@konekt.test
 // All demo passwords:        Demo@12345
-//
 // Safe to run multiple times (idempotent — skips if exists).
 // To remove all demo data, run: remove_demo.php
-// ============================================================
 
 require_once __DIR__ . '/api/config/database.php';
 
@@ -459,7 +453,6 @@ try {
     }
     out("IT Support Lead @ MediCare (ID: {$job8})", 'ok');
 
-
     // ══════════════════════════════════════════════════════════
     // 3. JOB SEEKER ACCOUNTS
     // ══════════════════════════════════════════════════════════
@@ -585,7 +578,6 @@ try {
     ]);
     out("Rafael Lim — Agricultural Technologist (ID: {$rafaelId})", 'ok');
 
-
     // ══════════════════════════════════════════════════════════
     // 4. CONNECTIONS & MESSAGES
     // ══════════════════════════════════════════════════════════
@@ -656,7 +648,6 @@ try {
        ->execute([$sofiaId, $miguelId, 'Hey Miguel! I\'m working on a data dashboard UI — can I pick your brain about what metrics matter most? 📊']);
     out("Messages: Sofia → Miguel (1 unread message)", 'ok');
 
-
     // ══════════════════════════════════════════════════════════
     // 5. JOB APPLICATIONS
     // ══════════════════════════════════════════════════════════
@@ -697,7 +688,6 @@ try {
         $job8, $isabellaId, "Dear MediCare Solutions Team,\n\nI am interested in the IT Support Lead position. With 4 years of experience managing network infrastructure and cybersecurity operations for SME clients, I am ready to take on a leadership role in healthcare IT.\n\nI am based in Cebu City and available to start immediately.\n\nThank you,\nIsabella Ramos"
     ]);
     out("Isabella → IT Support Lead @ MediCare (pending)", 'ok');
-
 
     // ══════════════════════════════════════════════════════════
     // COMMIT

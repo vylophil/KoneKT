@@ -1,36 +1,27 @@
-<?php
-// ============================================================
-// KONEKT — Compute Match Scores (Matchmaking Engine)
-// ============================================================
+﻿<?php
+// K
 // POST /api/matchmaking/compute_matches.php
-//
 // Computes match scores between:
 //   - A specific user and all active jobs
 //   - A specific job and all active job seekers
 //   - All users × all jobs (full recompute)
-//
 // Body (JSON):
 //   - user_id  (int, optional — compute matches for this user)
 //   - job_id   (int, optional — compute matches for this job)
 //   - If neither is provided, recomputes all matches
-//
 // Match Score Formula:
 //   Total = (Skill Score × 0.50) + (Experience Score × 0.30) + (Education Score × 0.20)
-//
 // Skill Score:
 //   - Counts matching skills between user and job
 //   - Weights by skill importance (required=1.0, preferred=0.6, nice_to_have=0.3)
 //   - Weights by proficiency (beginner=0.25, intermediate=0.50, advanced=0.75, expert=1.0)
 //   - Endorsements add a bonus multiplier
-//
 // Experience Score:
 //   - Compares user's years_of_experience vs job's min_experience_years
 //   - Bonus for relevant industry experience
-//
 // Education Score:
 //   - Maps education levels to numeric values
 //   - Compares user's highest degree vs job's requirement
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -43,7 +34,7 @@ $db   = getDB();
 $targetUserId = isset($data['user_id']) ? (int) $data['user_id'] : null;
 $targetJobId  = isset($data['job_id']) ? (int) $data['job_id'] : null;
 
-// --- Proficiency weights ---
+// Proficiency weights
 $proficiencyWeights = [
     'beginner'     => 0.25,
     'intermediate' => 0.50,
@@ -51,14 +42,14 @@ $proficiencyWeights = [
     'expert'       => 1.00,
 ];
 
-// --- Skill importance weights ---
+// Skill importance weights
 $importanceWeights = [
     'required'     => 1.00,
     'preferred'    => 0.60,
     'nice_to_have' => 0.30,
 ];
 
-// --- Education level mapping (higher = better) ---
+// Education level mapping (higher = better)
 $educationLevels = [
     'none'          => 0,
     'high_school'   => 1,
@@ -70,9 +61,7 @@ $educationLevels = [
     'other'         => 1,
 ];
 
-// ============================================================
-// HELPER: Compute skill score between a user and a job
-// ============================================================
+// H
 function computeSkillScore(PDO $db, int $userId, int $jobId, array $profWeights, array $impWeights): float
 {
     // Get job's required skills
@@ -124,9 +113,7 @@ function computeSkillScore(PDO $db, int $userId, int $jobId, array $profWeights,
     return $totalWeight > 0 ? ($matchedWeight / $totalWeight) * 100 : 0;
 }
 
-// ============================================================
-// HELPER: Compute experience score
-// ============================================================
+// H
 function computeExperienceScore(PDO $db, int $userId, int $jobId): float
 {
     // Get job's experience requirements
@@ -176,9 +163,7 @@ function computeExperienceScore(PDO $db, int $userId, int $jobId): float
     return min(100.0, ($ratio + $recencyBonus) * 100);
 }
 
-// ============================================================
-// HELPER: Compute education score
-// ============================================================
+// H
 function computeEducationScore(PDO $db, int $userId, int $jobId, array $eduLevels): float
 {
     // Get job's education requirement
@@ -216,9 +201,7 @@ function computeEducationScore(PDO $db, int $userId, int $jobId, array $eduLevel
     return ($userLevel / $requiredLevel) * 100;
 }
 
-// ============================================================
-// MAIN: Compute matches
-// ============================================================
+// M
 
 // Determine which users and jobs to process
 if ($targetUserId) {

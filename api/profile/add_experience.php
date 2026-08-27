@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Add Experience
-// ============================================================
+﻿<?php
+// K
 // POST /api/profile/add_experience.php
-//
 // Body (JSON):
 //   - company_name  (string, required)
 //   - job_title     (string, required)
@@ -12,7 +9,6 @@
 //   - end_date      (string, optional, Y-m-d)
 //   - is_current    (bool, optional, default false)
 //   - description   (string, optional)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -20,7 +16,7 @@ requireMethod('POST');
 $user = requireAuth();
 $data = getJsonBody();
 
-// --- Validate ---
+// Validate
 $errors = validateRequired($data, ['company_name', 'job_title', 'start_date']);
 if (!empty($errors)) {
     jsonError('Validation failed.', 422, $errors);

@@ -1,16 +1,11 @@
-<?php
-// ============================================================
-// KONEKT — List Conversations
-// ============================================================
+﻿<?php
+// K
 // GET /api/networking/list_conversations.php
-//
 // Returns a list of all conversations for the authenticated user,
 // showing the most recent message and unread count per conversation.
-//
 // Query params:
 //   - page  (int, optional, default 1)
 //   - limit (int, optional, default 20)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -22,7 +17,7 @@ $page   = max(1, (int) ($_GET['page'] ?? 1));
 $limit  = min(100, max(1, (int) ($_GET['limit'] ?? 20)));
 $offset = ($page - 1) * $limit;
 
-// --- Get unique conversation partners with latest message ---
+// Get unique conversation partners with latest message
 $sql = "
     SELECT
         other_user_id,
@@ -63,7 +58,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $conversations = $stmt->fetchAll();
 
-// --- Total conversation count ---
+// Total conversation count
 $stmt = $db->prepare('
     SELECT COUNT(DISTINCT IF(sender_id = :me1, receiver_id, sender_id))
     FROM messages
@@ -72,7 +67,7 @@ $stmt = $db->prepare('
 $stmt->execute([':me1' => $user['id'], ':me2' => $user['id'], ':me3' => $user['id']]);
 $total = (int) $stmt->fetchColumn();
 
-// --- Total unread messages ---
+// Total unread messages
 $stmt = $db->prepare('
     SELECT COUNT(*) FROM messages WHERE receiver_id = :me AND is_read = 0
 ');

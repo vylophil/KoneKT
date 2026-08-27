@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Delete Experience
-// ============================================================
+﻿<?php
+// K
 // DELETE /api/profile/delete_experience.php?experience_id=<id>
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -18,7 +15,7 @@ if (!$expId) {
 
 $db = getDB();
 
-// --- Verify ownership and delete ---
+// Verify ownership and delete
 $stmt = $db->prepare('DELETE FROM experience WHERE id = :id AND user_id = :user_id');
 $stmt->execute([':id' => $expId, ':user_id' => $user['id']]);
 

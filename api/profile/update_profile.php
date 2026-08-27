@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Update Profile
-// ============================================================
+﻿<?php
+// K
 // PUT /api/profile/update_profile.php
-//
 // Body (JSON):
 //   - headline           (string, optional)
 //   - bio                (string, optional)
@@ -14,7 +11,6 @@
 //   - github_url         (string, optional)
 //   - industry           (string, optional)
 //   - years_of_experience (int, optional)
-//
 // For employers, additional fields:
 //   - company_name       (string, optional)
 //   - company_description(string, optional)
@@ -23,7 +19,6 @@
 //   - company_location   (string, optional)
 //   - company_size       (string, optional)
 //   - founded_year       (int, optional)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -33,7 +28,7 @@ $data = getJsonBody();
 
 $db = getDB();
 
-// --- Update profile fields ---
+// Update profile fields
 $allowedFields = [
     'headline', 'bio', 'location', 'phone', 'website',
     'linkedin_url', 'github_url', 'industry', 'years_of_experience',
@@ -57,7 +52,7 @@ if (!empty($setClauses)) {
     $stmt->execute($params);
 }
 
-// --- Update first_name / last_name on users table ---
+// Update first_name / last_name on users table
 $userUpdates = [];
 $userParams  = [':id' => $user['id']];
 
@@ -78,7 +73,7 @@ if (!empty($userUpdates)) {
     $stmt->execute($userParams);
 }
 
-// --- Update company info (employer only) ---
+// Update company info (employer only)
 if ($user['role'] === 'employer') {
     $companyFields = [
         'company_name'        => 'name',

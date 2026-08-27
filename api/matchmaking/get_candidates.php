@@ -1,18 +1,13 @@
-<?php
-// ============================================================
-// KONEKT — Get Top Candidates for a Job
-// ============================================================
+﻿<?php
+// K
 // GET /api/matchmaking/get_candidates.php?job_id=<id>
-//
 // Returns top matching candidates for a specific job posting.
 // Employer only.
-//
 // Query params:
 //   - job_id     (int, required)
 //   - min_score  (number, optional, default 0)
 //   - page       (int, optional, default 1)
 //   - limit      (int, optional, default 20)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -27,7 +22,7 @@ if (!$jobId) {
 
 $db = getDB();
 
-// --- Verify ownership ---
+// Verify ownership
 $stmt = $db->prepare('SELECT id FROM job_postings WHERE id = :id AND employer_id = :employer_id');
 $stmt->execute([':id' => $jobId, ':employer_id' => $user['id']]);
 
@@ -40,7 +35,7 @@ $page     = max(1, (int) ($_GET['page'] ?? 1));
 $limit    = min(100, max(1, (int) ($_GET['limit'] ?? 20)));
 $offset   = ($page - 1) * $limit;
 
-// --- Count total candidates ---
+// Count total candidates
 $stmt = $db->prepare('
     SELECT COUNT(*) FROM job_matches jm
     JOIN users u ON u.id = jm.user_id AND u.is_active = 1
@@ -49,7 +44,7 @@ $stmt = $db->prepare('
 $stmt->execute([':job_id' => $jobId, ':min_score' => $minScore]);
 $total = (int) $stmt->fetchColumn();
 
-// --- Fetch candidates ---
+// Fetch candidates
 $stmt = $db->prepare('
     SELECT
         jm.match_score, jm.skill_score, jm.experience_score, jm.education_score,
@@ -70,7 +65,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $candidates = $stmt->fetchAll();
 
-// --- Attach skills to each candidate ---
+// Attach skills to each candidate
 foreach ($candidates as &$candidate) {
     $stmt = $db->prepare('
         SELECT s.name, s.category, us.proficiency_level, us.endorsement_count
@@ -82,7 +77,7 @@ foreach ($candidates as &$candidate) {
     $stmt->execute([':user_id' => $candidate['user_id']]);
     $candidate['skills'] = $stmt->fetchAll();
 
-    // --- Check if they applied ---
+    // Check if they applied
     $stmt = $db->prepare('
         SELECT id, status FROM job_applications
         WHERE job_id = :job_id AND user_id = :user_id

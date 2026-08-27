@@ -1,12 +1,8 @@
-<?php
-// ============================================================
-// KONEKT — Delete User Profile
-// ============================================================
+﻿<?php
+// K
 // POST /api/auth/delete_profile.php
-//
 // Deletes the currently signed-in user's account and related
 // data from the database when available, then clears the session.
-// ============================================================
 
 session_start();
 

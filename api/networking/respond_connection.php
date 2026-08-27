@@ -1,13 +1,9 @@
-<?php
-// ============================================================
-// KONEKT — Respond to Connection Request
-// ============================================================
+﻿<?php
+// K
 // PUT /api/networking/respond_connection.php
-//
 // Body (JSON):
 //   - connection_id (int, required)
 //   - action        (string, required: 'accept' | 'reject')
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -29,7 +25,7 @@ if (!validateEnum($action, ['accept', 'reject'])) {
 
 $db = getDB();
 
-// --- Verify the request was sent TO this user and is pending ---
+// Verify the request was sent TO this user and is pending
 $stmt = $db->prepare('
     SELECT id, requester_id FROM connections
     WHERE id = :id AND receiver_id = :receiver_id AND status = "pending"

@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Get Single Job Posting
-// ============================================================
+﻿<?php
+// K
 // GET /api/jobs/get_job.php?job_id=<id>
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -18,7 +15,7 @@ if (!$jobId) {
 
 $db = getDB();
 
-// --- Fetch job with company info ---
+// Fetch job with company info
 $stmt = $db->prepare('
     SELECT
         jp.*,
@@ -39,7 +36,7 @@ if (!$job) {
     jsonError('Job posting not found.', 404);
 }
 
-// --- Fetch required skills ---
+// Fetch required skills
 $stmt = $db->prepare('
     SELECT s.id, s.name, s.category, js.importance
     FROM job_skills js
@@ -50,7 +47,7 @@ $stmt = $db->prepare('
 $stmt->execute([':job_id' => $jobId]);
 $job['skills'] = $stmt->fetchAll();
 
-// --- Check if current user has applied ---
+// Check if current user has applied
 $currentUserId = getCurrentUserId();
 if ($currentUserId) {
     $stmt = $db->prepare('
@@ -60,7 +57,7 @@ if ($currentUserId) {
     $stmt->execute([':job_id' => $jobId, ':user_id' => $currentUserId]);
     $job['user_application'] = $stmt->fetch() ?: null;
 
-    // --- Check if saved ---
+    // Check if saved
     $stmt = $db->prepare('
         SELECT id FROM saved_jobs
         WHERE job_id = :job_id AND user_id = :user_id
@@ -69,7 +66,7 @@ if ($currentUserId) {
     $job['is_saved'] = (bool) $stmt->fetch();
 }
 
-// --- Application count (for employer) ---
+// Application count (for employer)
 $stmt = $db->prepare('SELECT COUNT(*) FROM job_applications WHERE job_id = :job_id');
 $stmt->execute([':job_id' => $jobId]);
 $job['application_count'] = (int) $stmt->fetchColumn();

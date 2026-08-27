@@ -1,16 +1,11 @@
-<?php
-// ============================================================
-// KONEKT — Add Skill to Profile
-// ============================================================
+﻿<?php
+// K
 // POST /api/profile/add_skill.php
-//
 // Body (JSON):
 //   - skill_id          (int, optional — use if skill exists in catalog)
 //   - skill_name        (string, optional — creates new skill if not in catalog)
 //   - proficiency_level (string, optional: beginner|intermediate|advanced|expert)
-//
 // Must provide either skill_id or skill_name.
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -24,13 +19,13 @@ $skillId          = isset($data['skill_id']) ? (int) $data['skill_id'] : null;
 $skillName        = isset($data['skill_name']) ? trim($data['skill_name']) : null;
 $proficiencyLevel = isset($data['proficiency_level']) ? $data['proficiency_level'] : 'beginner';
 
-// --- Validate proficiency level ---
+// Validate proficiency level
 $validLevels = ['beginner', 'intermediate', 'advanced', 'expert'];
 if (!validateEnum($proficiencyLevel, $validLevels)) {
     jsonError('Invalid proficiency_level. Allowed: ' . implode(', ', $validLevels), 422);
 }
 
-// --- Resolve skill ID ---
+// Resolve skill ID
 if (!$skillId && !$skillName) {
     jsonError('Provide either skill_id or skill_name.', 422);
 }
@@ -54,7 +49,7 @@ if (!$skillId && $skillName) {
     }
 }
 
-// --- Check if user already has this skill ---
+// Check if user already has this skill
 $stmt = $db->prepare('SELECT id FROM user_skills WHERE user_id = :user_id AND skill_id = :skill_id');
 $stmt->execute([':user_id' => $user['id'], ':skill_id' => $skillId]);
 
@@ -62,7 +57,7 @@ if ($stmt->fetch()) {
     jsonError('You already have this skill in your profile.', 409);
 }
 
-// --- Add skill to user profile ---
+// Add skill to user profile
 $stmt = $db->prepare('
     INSERT INTO user_skills (user_id, skill_id, proficiency_level)
     VALUES (:user_id, :skill_id, :proficiency_level)

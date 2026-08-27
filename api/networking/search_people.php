@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Search People / Discover Profiles
-// ============================================================
+﻿<?php
+// K
 // GET /api/networking/search_people.php
-//
 // Query params:
 //   - search    (string, optional — search by name, headline)
 //   - skill_ids (comma-separated int, optional)
@@ -12,7 +9,6 @@
 //   - role      (string, optional: job_seeker|employer)
 //   - page      (int, optional, default 1)
 //   - limit     (int, optional, default 20)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -70,12 +66,12 @@ if ($skillIds !== '') {
 
 $whereClause = implode(' AND ', $where);
 
-// --- Count ---
+// Count
 $stmt = $db->prepare("SELECT COUNT(DISTINCT u.id) FROM users u {$joins} WHERE {$whereClause}");
 $stmt->execute($params);
 $total = (int) $stmt->fetchColumn();
 
-// --- Fetch ---
+// Fetch
 $sql = "
     SELECT DISTINCT
         u.id, u.first_name, u.last_name, u.role, u.created_at,
@@ -97,7 +93,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $people = $stmt->fetchAll();
 
-// --- Attach connection status and mutual connections count ---
+// Attach connection status and mutual connections count
 foreach ($people as &$person) {
     // Connection status
     $stmt = $db->prepare('

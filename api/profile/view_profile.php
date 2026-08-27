@@ -1,12 +1,8 @@
-<?php
-// ============================================================
-// KONEKT — Log Profile View
-// ============================================================
+﻿<?php
+// K
 // POST /api/profile/view_profile.php
-//
 // Body (JSON):
 //   - viewed_user_id (int, required)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -20,7 +16,7 @@ if (!isset($data['viewed_user_id']) || !validatePositiveInt($data['viewed_user_i
 
 $viewedId = (int) $data['viewed_user_id'];
 
-// --- Don't log self-views ---
+// Don't log self-views
 if ($viewedId === $user['id']) {
     jsonSuccess(null, 'Self-view not logged.');
     return;
@@ -28,7 +24,7 @@ if ($viewedId === $user['id']) {
 
 $db = getDB();
 
-// --- Verify viewed user exists ---
+// Verify viewed user exists
 $stmt = $db->prepare('SELECT id FROM users WHERE id = :id AND is_active = 1');
 $stmt->execute([':id' => $viewedId]);
 
@@ -36,7 +32,7 @@ if (!$stmt->fetch()) {
     jsonError('User not found.', 404);
 }
 
-// --- Throttle: don't log more than one view per viewer per day ---
+// Throttle: don't log more than one view per viewer per day
 $stmt = $db->prepare('
     SELECT id FROM profile_views
     WHERE viewer_id = :viewer_id AND viewed_id = :viewed_id

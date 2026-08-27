@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
   const footer = document.querySelector('.konekt-footer');
   if (footer) {
     footer.classList.add('js-ready');

@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — List / Search Job Postings
-// ============================================================
+﻿<?php
+// K
 // GET /api/jobs/list_jobs.php
-//
 // Query params:
 //   - search            (string, optional — search title/description)
 //   - job_type          (string, optional)
@@ -15,7 +12,6 @@
 //   - page              (int, optional, default 1)
 //   - limit             (int, optional, default 20, max 100)
 //   - sort              (string, optional: newest|salary_high|salary_low)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -24,7 +20,7 @@ requireAuth();
 
 $db = getDB();
 
-// --- Parse params ---
+// Parse params
 $search           = isset($_GET['search']) ? trim($_GET['search']) : '';
 $jobType          = $_GET['job_type'] ?? '';
 $workArrangement  = $_GET['work_arrangement'] ?? '';
@@ -37,7 +33,7 @@ $limit            = min(100, max(1, (int) ($_GET['limit'] ?? 20)));
 $sort             = $_GET['sort'] ?? 'newest';
 $offset           = ($page - 1) * $limit;
 
-// --- Build query ---
+// Build query
 $where  = ['jp.is_active = 1'];
 $params = [];
 $joins  = '';
@@ -73,7 +69,7 @@ if ($companyId > 0) {
     $params[':company_id']   = $companyId;
 }
 
-// --- Filter by skills ---
+// Filter by skills
 if ($skillIds !== '') {
     $skillIdArray = array_filter(array_map('intval', explode(',', $skillIds)));
     if (!empty($skillIdArray)) {
@@ -88,7 +84,7 @@ if ($skillIds !== '') {
     }
 }
 
-// --- Sort ---
+// Sort
 $orderBy = 'jp.created_at DESC'; // default: newest
 if ($sort === 'salary_high') {
     $orderBy = 'jp.salary_max DESC';
@@ -98,13 +94,13 @@ if ($sort === 'salary_high') {
 
 $whereClause = implode(' AND ', $where);
 
-// --- Count total ---
+// Count total
 $countSql = "SELECT COUNT(DISTINCT jp.id) as total FROM job_postings jp {$joins} WHERE {$whereClause}";
 $stmt = $db->prepare($countSql);
 $stmt->execute($params);
 $total = (int) $stmt->fetchColumn();
 
-// --- Fetch jobs ---
+// Fetch jobs
 $sql = "
     SELECT DISTINCT
         jp.id, jp.title, jp.description, jp.location, jp.job_type,
@@ -130,7 +126,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $jobs = $stmt->fetchAll();
 
-// --- Attach skills to each job ---
+// Attach skills to each job
 if (!empty($jobs)) {
     $jobIds = array_column($jobs, 'id');
     $placeholders = implode(',', array_fill(0, count($jobIds), '?'));

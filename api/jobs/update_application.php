@@ -1,17 +1,12 @@
-<?php
-// ============================================================
-// KONEKT — Update Application Status
-// ============================================================
+﻿<?php
+// K
 // PUT /api/jobs/update_application.php
-//
 // For Employers:
 //   Body: { application_id, status }
 //   Allowed statuses: reviewing, shortlisted, interview, offered, rejected
-//
 // For Job Seekers:
 //   Body: { application_id, status }
 //   Allowed statuses: withdrawn, accepted
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -29,7 +24,7 @@ $newStatus = $data['status'];
 $db        = getDB();
 
 if ($user['role'] === 'employer') {
-    // --- Employer updates application status ---
+    // Employer updates application status
     $allowedStatuses = ['reviewing', 'shortlisted', 'interview', 'offered', 'rejected'];
 
     if (!validateEnum($newStatus, $allowedStatuses)) {
@@ -49,7 +44,7 @@ if ($user['role'] === 'employer') {
     }
 
 } else {
-    // --- Job seeker can withdraw or accept ---
+    // Job seeker can withdraw or accept
     $allowedStatuses = ['withdrawn', 'accepted'];
 
     if (!validateEnum($newStatus, $allowedStatuses)) {
@@ -64,7 +59,7 @@ if ($user['role'] === 'employer') {
     }
 }
 
-// --- Update status ---
+// Update status
 $stmt = $db->prepare('UPDATE job_applications SET status = :status WHERE id = :id');
 $stmt->execute([':status' => $newStatus, ':id' => $appId]);
 

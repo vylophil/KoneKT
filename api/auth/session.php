@@ -1,10 +1,7 @@
-<?php
-// ============================================================
-// KONEKT — Session Guard
-// ============================================================
+﻿<?php
+// K
 // Session management and authentication guard.
 // Include this file at the top of any protected endpoint.
-// ============================================================
 
 session_start();
 
@@ -12,12 +9,7 @@ require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/../helpers/response.php';
 require_once __DIR__ . '/../helpers/validation.php';
 
-/**
- * Require an authenticated session.
- * Sends a 401 response if the user is not logged in.
- *
- * @return array The authenticated user data from the session
- */
+// Require an authenticated session.
 function requireAuth(): array
 {
     if (!isset($_SESSION['user_id'])) {
@@ -33,13 +25,7 @@ function requireAuth(): array
     ];
 }
 
-/**
- * Require a specific user role.
- * Sends a 403 response if the user's role doesn't match.
- *
- * @param string $role Required role ('job_seeker' or 'employer')
- * @return array The authenticated user data
- */
+// Require a specific user role.
 function requireRole(string $role): array
 {
     $user = requireAuth();
@@ -51,21 +37,13 @@ function requireRole(string $role): array
     return $user;
 }
 
-/**
- * Get the current user's ID if logged in, or null.
- *
- * @return int|null
- */
+// Get the current user's ID if logged in, or null.
 function getCurrentUserId(): ?int
 {
     return $_SESSION['user_id'] ?? null;
 }
 
-/**
- * Check if the current session user is logged in.
- *
- * @return bool
- */
+// Check if the current session user is logged in.
 function isLoggedIn(): bool
 {
     return isset($_SESSION['user_id']);

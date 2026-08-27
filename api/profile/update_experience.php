@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Update Experience
-// ============================================================
+﻿<?php
+// K
 // PUT /api/profile/update_experience.php
-//
 // Body (JSON):
 //   - experience_id (int, required)
 //   - company_name  (string, optional)
@@ -13,7 +10,6 @@
 //   - end_date      (string, optional, Y-m-d)
 //   - is_current    (bool, optional)
 //   - description   (string, optional)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -28,7 +24,7 @@ if (!isset($data['experience_id']) || !validatePositiveInt($data['experience_id'
 $expId = (int) $data['experience_id'];
 $db = getDB();
 
-// --- Verify ownership ---
+// Verify ownership
 $stmt = $db->prepare('SELECT id FROM experience WHERE id = :id AND user_id = :user_id');
 $stmt->execute([':id' => $expId, ':user_id' => $user['id']]);
 
@@ -36,7 +32,7 @@ if (!$stmt->fetch()) {
     jsonError('Experience entry not found or access denied.', 404);
 }
 
-// --- Build dynamic update ---
+// Build dynamic update
 $allowedFields = ['company_name', 'job_title', 'location', 'start_date', 'end_date', 'is_current', 'description'];
 $setClauses = [];
 $params     = [':id' => $expId];

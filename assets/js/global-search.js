@@ -1,9 +1,6 @@
-// ============================================================
-// KONEKT — Network Search (People Only)
-// ============================================================
+﻿// KONEKT — Network Search (People Only)
 // Used on network.php — searches via /api/search/global_search.php
 // Debounced input, keyboard navigation, click-outside-to-close.
-// ============================================================
 
 (function () {
   'use strict';

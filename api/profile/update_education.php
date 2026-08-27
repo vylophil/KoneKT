@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Update Education
-// ============================================================
+﻿<?php
+// K
 // PUT /api/profile/update_education.php
-//
 // Body (JSON):
 //   - education_id   (int, required)
 //   - institution    (string, optional)
@@ -14,7 +11,6 @@
 //   - is_current     (bool, optional)
 //   - grade          (string, optional)
 //   - description    (string, optional)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -29,7 +25,7 @@ if (!isset($data['education_id']) || !validatePositiveInt($data['education_id'])
 $eduId = (int) $data['education_id'];
 $db = getDB();
 
-// --- Verify ownership ---
+// Verify ownership
 $stmt = $db->prepare('SELECT id FROM education WHERE id = :id AND user_id = :user_id');
 $stmt->execute([':id' => $eduId, ':user_id' => $user['id']]);
 
@@ -37,7 +33,7 @@ if (!$stmt->fetch()) {
     jsonError('Education entry not found or access denied.', 404);
 }
 
-// --- Validate degree if provided ---
+// Validate degree if provided
 if (isset($data['degree'])) {
     $validDegrees = ['high_school', 'associate', 'bachelors', 'masters', 'doctorate', 'certification', 'other'];
     if (!validateEnum($data['degree'], $validDegrees)) {
@@ -45,7 +41,7 @@ if (isset($data['degree'])) {
     }
 }
 
-// --- Build dynamic update ---
+// Build dynamic update
 $allowedFields = ['institution', 'degree', 'field_of_study', 'start_date', 'end_date', 'is_current', 'grade', 'description'];
 $setClauses = [];
 $params     = [':id' => $eduId];

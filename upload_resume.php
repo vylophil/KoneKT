@@ -78,18 +78,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resume'])) {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Upload Resume · KoneKT</title>
 
-  <!-- Google Fonts -->
+  <?php // Google Fonts ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5 & Icons -->
+  <?php // Bootstrap 5 & Icons ?>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/theme.css" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Shared Navbar -->
+  <?php // Shared Navbar ?>
   <?php if (file_exists('includes/navbar.php')) include 'includes/navbar.php'; ?>
 
   <main class="container py-5">
@@ -107,7 +107,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resume'])) {
           </div>
         <?php endif; ?>
 
-        <!-- Current resume status -->
+        <?php // Current resume status ?>
         <?php if ($currentResume): ?>
         <div class="konekt-card p-3 mb-4 d-flex align-items-center justify-content-between">
           <div class="d-flex align-items-center gap-2">
@@ -155,7 +155,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resume'])) {
     </div>
   </main>
 
-  <!-- Shared Footer -->
+  <?php // Shared Footer ?>
   <?php if (file_exists('includes/footer.php')) include 'includes/footer.php'; ?>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -164,6 +164,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resume'])) {
     const dropZone = document.getElementById('dropZone');
     const fileName = document.getElementById('fileName');
 
+    // Handle file selection
     fileInput.addEventListener('change', () => {
       if (fileInput.files.length > 0) {
         fileName.textContent = fileInput.files[0].name;
@@ -171,6 +172,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['resume'])) {
       }
     });
 
+    // Handle drag and drop
     dropZone.addEventListener('dragover', (e) => { e.preventDefault(); dropZone.classList.add('dragover'); });
     dropZone.addEventListener('dragleave', () => { dropZone.classList.remove('dragover'); });
     dropZone.addEventListener('drop', (e) => {

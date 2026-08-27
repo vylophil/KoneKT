@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Remove Skill from Profile
-// ============================================================
+﻿<?php
+// K
 // DELETE /api/profile/remove_skill.php?skill_id=<id>
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -18,7 +15,7 @@ if (!$skillId) {
 
 $db = getDB();
 
-// --- Delete the user_skill entry ---
+// Delete the user_skill entry
 $stmt = $db->prepare('DELETE FROM user_skills WHERE user_id = :user_id AND skill_id = :skill_id');
 $stmt->execute([':user_id' => $user['id'], ':skill_id' => $skillId]);
 
@@ -26,7 +23,7 @@ if ($stmt->rowCount() === 0) {
     jsonError('Skill not found in your profile.', 404);
 }
 
-// --- Also remove associated endorsements ---
+// Also remove associated endorsements
 $stmt = $db->prepare('DELETE FROM endorsements WHERE endorsed_user_id = :user_id AND skill_id = :skill_id');
 $stmt->execute([':user_id' => $user['id'], ':skill_id' => $skillId]);
 

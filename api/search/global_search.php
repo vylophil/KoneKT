@@ -1,12 +1,8 @@
-<?php
-// ============================================================
-// KONEKT — Global Search (People + Companies)
-// ============================================================
+﻿<?php
+// K
 // GET /api/search/global_search.php?q=<query>
-//
 // Returns up to 5 people and 5 companies matching the query.
 // Requires authentication.
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 

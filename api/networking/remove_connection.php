@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Remove Connection
-// ============================================================
+﻿<?php
+// K
 // DELETE /api/networking/remove_connection.php?connection_id=<id>
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -18,7 +15,7 @@ if (!$connectionId) {
 
 $db = getDB();
 
-// --- Verify user is part of this connection ---
+// Verify user is part of this connection
 $stmt = $db->prepare('
     DELETE FROM connections
     WHERE id = :id AND (requester_id = :user_id1 OR receiver_id = :user_id2)

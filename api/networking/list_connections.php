@@ -1,15 +1,11 @@
-<?php
-// ============================================================
-// KONEKT — List Connections
-// ============================================================
+﻿<?php
+// K
 // GET /api/networking/list_connections.php
-//
 // Query params:
 //   - status  (string, optional: pending|accepted — default: accepted)
 //   - type    (string, optional: sent|received|all — default: all)
 //   - page    (int, optional, default 1)
 //   - limit   (int, optional, default 20)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -40,12 +36,12 @@ if ($type === 'sent') {
 
 $whereClause = implode(' AND ', $where);
 
-// --- Count ---
+// Count
 $stmt = $db->prepare("SELECT COUNT(*) FROM connections c WHERE {$whereClause}");
 $stmt->execute($params);
 $total = (int) $stmt->fetchColumn();
 
-// --- Fetch with connected user info ---
+// Fetch with connected user info
 $sql = "
     SELECT
         c.id AS connection_id, c.requester_id, c.receiver_id, c.status,

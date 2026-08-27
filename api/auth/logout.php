@@ -1,11 +1,7 @@
-<?php
-// ============================================================
-// KONEKT — User Logout
-// ============================================================
+﻿<?php
+// K
 // POST /api/auth/logout.php
-//
 // Destroys the current session and logs the user out.
-// ============================================================
 
 session_start();
 
@@ -13,7 +9,7 @@ require_once __DIR__ . '/../helpers/response.php';
 
 requireMethod('POST');
 
-// --- Destroy session ---
+// Destroy session
 $_SESSION = [];
 
 if (ini_get('session.use_cookies')) {

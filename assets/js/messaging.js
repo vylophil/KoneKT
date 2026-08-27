@@ -1,4 +1,4 @@
-document.addEventListener('DOMContentLoaded', () => {
+﻿document.addEventListener('DOMContentLoaded', () => {
   const messageForm = document.getElementById('messageForm');
   const messageInput = document.getElementById('messageInput');
   const messageStatus = document.getElementById('messageStatus');
@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   scrollToBottom();
 
-  // --- Send Message ---
+  // Send Message
   if (messageForm) {
     messageForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -66,7 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Append a message bubble to the chat ---
+  // Append a message bubble to the chat
   function appendMessage(text, timeStr, isMine) {
     if (!chatMessages) return;
 
@@ -97,7 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
     scrollToBottom();
   }
 
-  // --- Poll for new messages every 5 seconds ---
+  // Poll for new messages every 5 seconds
   let lastMessageCount = chatMessages ? chatMessages.children.length : 0;
 
   async function pollMessages() {
@@ -131,7 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(pollMessages, 5000);
   }
 
-  // --- Connection Request Accept/Reject ---
+  // Connection Request Accept/Reject
   document.querySelectorAll('.conn-respond').forEach(btn => {
     btn.addEventListener('click', async () => {
       const connId = parseInt(btn.dataset.id);

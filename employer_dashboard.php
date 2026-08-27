@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (empty($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'employer') {
   header('Location: login.php');
@@ -105,7 +105,7 @@ $displayName = trim(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_nam
       </div>
     <?php else: ?>
 
-    <!-- Stats Row -->
+    <?php // Stats row ?>
     <div class="row g-4 mb-4">
       <div class="col-md-4">
         <div class="konekt-card stat-card">
@@ -130,7 +130,7 @@ $displayName = trim(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_nam
       </div>
     </div>
 
-    <!-- Recent Jobs -->
+    <?php // Recent jobs ?>
     <div class="konekt-card p-4 mb-4">
       <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="h5 mb-0">Your Job Postings</h2>
@@ -154,7 +154,7 @@ $displayName = trim(($_SESSION['first_name'] ?? '') . ' ' . ($_SESSION['last_nam
       <?php endif; ?>
     </div>
 
-    <!-- Quick Actions -->
+    <?php // Quick actions ?>
     <div class="row g-4">
       <div class="col-md-4">
         <a href="employer_applicants.php" class="konekt-card p-4 text-decoration-none text-center d-block h-100">

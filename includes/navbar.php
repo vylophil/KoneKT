@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // Ensure $active_page and $unread_messages are set by the including page
 $active_page      = $active_page ?? 'home';
 $unread_messages   = $unread_messages ?? 0;
@@ -8,7 +8,7 @@ $isLoggedIn        = !empty($_SESSION['user_id']);
 ?>
 <nav class="navbar navbar-expand-lg konekt-navbar sticky-top">
   <div class="container">
-    <!-- Brand Title matching theme tokens -->
+    <?php // Brand Title matching theme tokens ?>
     <a class="navbar-brand" href="index.php">
       <span class="match-pulse me-1"></span>
       <span class="brand-k">Kone</span>KT
@@ -25,7 +25,7 @@ $isLoggedIn        = !empty($_SESSION['user_id']);
         </li>
 
         <?php if ($isEmployer): ?>
-          <!-- Employer navigation -->
+          <?php // Employer navigation ?>
           <li class="nav-item">
             <a class="nav-link <?= ($active_page === 'employer_dashboard') ? 'active' : '' ?>" href="employer_dashboard.php">Dashboard</a>
           </li>
@@ -36,7 +36,7 @@ $isLoggedIn        = !empty($_SESSION['user_id']);
             <a class="nav-link <?= ($active_page === 'employer_applicants') ? 'active' : '' ?>" href="employer_applicants.php">Applicants</a>
           </li>
         <?php else: ?>
-          <!-- Job seeker navigation -->
+          <?php // Job seeker navigation ?>
           <li class="nav-item">
             <a class="nav-link <?= ($active_page === 'dashboard') ? 'active' : '' ?>" href="dashboard.php">Dashboard</a>
           </li>

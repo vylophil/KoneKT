@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 
 require_once __DIR__ . '/api/config/database.php';
@@ -111,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
           <form method="post" id="registerForm">
 
-            <!-- Role Toggle -->
+            <?php // Role Toggle ?>
             <div class="mb-4">
               <label class="form-label fw-semibold d-block">I am a</label>
               <div class="role-toggle d-flex rounded-3 overflow-hidden border" style="max-width: 340px;">
@@ -137,7 +137,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
               </div>
             </div>
 
-            <!-- Company name (shown only for employers) -->
+            <?php // Company name (shown only for employers) ?>
             <div class="mb-3" id="companyField" style="display: none;">
               <label class="form-label fw-semibold">Company name</label>
               <input type="text" name="company_name" class="form-control" placeholder="e.g. Accenture Philippines">

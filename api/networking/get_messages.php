@@ -1,19 +1,13 @@
-<?php
-// ============================================================
-// KONEKT — Get Messages (Conversation)
-// ============================================================
+﻿<?php
+// K
 // GET /api/networking/get_messages.php?user_id=<id>
-//
 // Returns the message thread between the authenticated user
 // and the specified user_id.
-//
 // Query params:
 //   - user_id (int, required — the other user in conversation)
 //   - page    (int, optional, default 1)
 //   - limit   (int, optional, default 50)
-//
 // Also marks unread messages from the other user as read.
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -31,7 +25,7 @@ $page  = max(1, (int) ($_GET['page'] ?? 1));
 $limit = min(200, max(1, (int) ($_GET['limit'] ?? 50)));
 $offset = ($page - 1) * $limit;
 
-// --- Count total messages in conversation ---
+// Count total messages in conversation
 $stmt = $db->prepare('
     SELECT COUNT(*) FROM messages
     WHERE (sender_id = :uid1 AND receiver_id = :uid2)
@@ -45,7 +39,7 @@ $stmt->execute([
 ]);
 $total = (int) $stmt->fetchColumn();
 
-// --- Fetch messages ---
+// Fetch messages
 $stmt = $db->prepare('
     SELECT
         m.id, m.sender_id, m.receiver_id, m.content, m.is_read, m.sent_at,
@@ -66,14 +60,14 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $messages = $stmt->fetchAll();
 
-// --- Mark messages from the other user as read ---
+// Mark messages from the other user as read
 $stmt = $db->prepare('
     UPDATE messages SET is_read = 1
     WHERE sender_id = :sender_id AND receiver_id = :receiver_id AND is_read = 0
 ');
 $stmt->execute([':sender_id' => $otherUserId, ':receiver_id' => $user['id']]);
 
-// --- Get other user's info ---
+// Get other user's info
 $stmt = $db->prepare('
     SELECT u.id, u.first_name, u.last_name, p.headline, p.avatar_url
     FROM users u

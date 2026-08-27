@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 $active_page = 'find_jobs';
 $unread_messages = 0;
@@ -120,23 +120,23 @@ if ($isLoggedIn && !empty($jobs) && ($_SESSION['role'] ?? '') === 'job_seeker') 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Find Jobs · KoneKT</title>
 
-  <!-- Google Fonts -->
+  <?php // Google Fonts ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5 & Icons -->
+  <?php // Bootstrap 5 & Icons ?>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/theme.css" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Shared Navbar -->
+  <?php // Shared Navbar ?>
   <?php if (file_exists('includes/navbar.php')) include 'includes/navbar.php'; ?>
 
   <main class="container py-5">
 
-    <!-- Search Banner -->
+    <?php // Search Banner ?>
     <div class="konekt-card p-4 p-md-5 mb-4 text-white text-center rounded-4" style="background-color: var(--ink-navy);">
       <h1 class="h3 mb-2 text-white">Find Cross-Field Opportunities</h1>
       <p class="text-white-50 mb-4 mx-auto" style="max-width: 550px;">Search roles across industries tailored to your skills and qualifications.</p>
@@ -160,7 +160,7 @@ if ($isLoggedIn && !empty($jobs) && ($_SESSION['role'] ?? '') === 'job_seeker') 
       </form>
     </div>
 
-    <!-- Results -->
+    <?php // Results ?>
     <div class="mb-3">
       <p class="text-secondary small"><?= $total ?> job<?= $total !== 1 ? 's' : '' ?> found<?= $keyword ? ' for "' . htmlspecialchars($keyword, ENT_QUOTES, 'UTF-8') . '"' : '' ?></p>
     </div>
@@ -236,10 +236,10 @@ if ($isLoggedIn && !empty($jobs) && ($_SESSION['role'] ?? '') === 'job_seeker') 
     <?php endif; ?>
   </main>
 
-  <!-- Shared Footer -->
+  <?php // Shared Footer ?>
   <?php if (file_exists('includes/footer.php')) include 'includes/footer.php'; ?>
 
-  <!-- Connect with Employer Modal -->
+  <?php // Connect with Employer Modal ?>
   <div class="modal fade" id="connectEmployerModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
       <div class="modal-content border-0 shadow-lg" style="border-radius: 14px;">

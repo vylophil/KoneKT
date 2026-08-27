@@ -1,16 +1,12 @@
-<?php
-// ============================================================
-// KONEKT — Get Profile
-// ============================================================
+﻿<?php
+// K
 // GET /api/profile/get_profile.php?user_id=<id>
-//
 // Returns the full profile for a given user, including:
 //   - Basic info, headline, bio, location
 //   - Skills with proficiency & endorsement counts
 //   - Experience history
 //   - Education history
 //   - Company info (if employer)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -25,7 +21,7 @@ if (!$userId) {
 
 $db = getDB();
 
-// --- Fetch user + profile ---
+// Fetch user + profile
 $stmt = $db->prepare('
     SELECT
         u.id, u.email, u.role, u.first_name, u.last_name, u.created_at,
@@ -43,7 +39,7 @@ if (!$profile) {
     jsonError('User not found.', 404);
 }
 
-// --- Fetch skills ---
+// Fetch skills
 $stmt = $db->prepare('
     SELECT s.id, s.name, s.category, us.proficiency_level, us.endorsement_count
     FROM user_skills us
@@ -54,7 +50,7 @@ $stmt = $db->prepare('
 $stmt->execute([':user_id' => $userId]);
 $profile['skills'] = $stmt->fetchAll();
 
-// --- Fetch experience ---
+// Fetch experience
 $stmt = $db->prepare('
     SELECT id, company_name, job_title, location, start_date, end_date, is_current, description
     FROM experience
@@ -64,7 +60,7 @@ $stmt = $db->prepare('
 $stmt->execute([':user_id' => $userId]);
 $profile['experience'] = $stmt->fetchAll();
 
-// --- Fetch education ---
+// Fetch education
 $stmt = $db->prepare('
     SELECT id, institution, degree, field_of_study, start_date, end_date, is_current, grade, description
     FROM education
@@ -74,7 +70,7 @@ $stmt = $db->prepare('
 $stmt->execute([':user_id' => $userId]);
 $profile['education'] = $stmt->fetchAll();
 
-// --- Fetch company info (if employer) ---
+// Fetch company info (if employer)
 if ($profile['role'] === 'employer') {
     $stmt = $db->prepare('
         SELECT id, name, description, industry, website, logo_url, location, company_size, founded_year
@@ -85,7 +81,7 @@ if ($profile['role'] === 'employer') {
     $profile['company'] = $stmt->fetch() ?: null;
 }
 
-// --- Connection status (if viewing someone else's profile) ---
+// Connection status (if viewing someone else's profile)
 $currentUserId = getCurrentUserId();
 if ($currentUserId && $currentUserId !== $userId) {
     $stmt = $db->prepare('

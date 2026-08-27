@@ -1,16 +1,11 @@
-<?php
-// ============================================================
-// KONEKT — Get Job Matches for a User
-// ============================================================
+﻿<?php
+// K
 // GET /api/matchmaking/get_matches.php
-//
 // Returns top matching jobs for the authenticated user.
-//
 // Query params:
 //   - min_score  (number, optional, default 0)
 //   - page       (int, optional, default 1)
 //   - limit      (int, optional, default 20)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -23,7 +18,7 @@ $page     = max(1, (int) ($_GET['page'] ?? 1));
 $limit    = min(100, max(1, (int) ($_GET['limit'] ?? 20)));
 $offset   = ($page - 1) * $limit;
 
-// --- Count total matches ---
+// Count total matches
 $stmt = $db->prepare('
     SELECT COUNT(*) FROM job_matches jm
     JOIN job_postings jp ON jp.id = jm.job_id AND jp.is_active = 1
@@ -32,7 +27,7 @@ $stmt = $db->prepare('
 $stmt->execute([':user_id' => $user['id'], ':min_score' => $minScore]);
 $total = (int) $stmt->fetchColumn();
 
-// --- Fetch matches with job details ---
+// Fetch matches with job details
 $stmt = $db->prepare('
     SELECT
         jm.match_score, jm.skill_score, jm.experience_score, jm.education_score,
@@ -55,7 +50,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $matches = $stmt->fetchAll();
 
-// --- Attach skills to each matched job ---
+// Attach skills to each matched job
 if (!empty($matches)) {
     $jobIds = array_column($matches, 'job_id');
     $placeholders = implode(',', array_fill(0, count($jobIds), '?'));

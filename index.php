@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 $active_page = 'home';
 $unread_messages = 3; // Pull real count dynamically from DB if logged in
 ?>
@@ -9,21 +9,21 @@ $unread_messages = 3; // Pull real count dynamically from DB if logged in
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>KoneKT · Smart Resume & Cross-Field Job Matching</title>
 
-  <!-- Google Fonts -->
+  <?php // Google Fonts ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5 & Icons -->
+  <?php // Bootstrap 5 & Icons ?>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/theme.css" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Shared Navbar -->
+  <?php // Shared Navbar ?>
   <?php if (file_exists('includes/navbar.php')) include 'includes/navbar.php'; ?>
 
-  <!-- Hero Section -->
+  <?php // Hero Section ?>
   <header class="py-5 bg-white border-bottom">
     <div class="container my-4 text-center">
       <span class="match-chip mb-3">
@@ -45,10 +45,10 @@ $unread_messages = 3; // Pull real count dynamically from DB if logged in
     </div>
   </header>
 
-  <!-- Main Content Area -->
+  <?php // Main Content Area ?>
   <main class="container py-5">
     
-    <!-- Feature Highlights -->
+    <?php // Feature Highlights ?>
     <div class="row g-4 mb-5">
       <div class="col-md-4">
         <div class="konekt-card p-4 h-100">
@@ -81,7 +81,7 @@ $unread_messages = 3; // Pull real count dynamically from DB if logged in
       </div>
     </div>
 
-    <!-- Quick Callout Section -->
+    <?php // Quick Callout Section ?>
     <div class="konekt-card p-4 p-md-5 text-white text-center rounded-4" style="background-color: var(--ink-navy);">
       <h2 class="h3 mb-2 text-white">Ready to find your match?</h2>
       <p class="mb-4 text-white-50">Set up your cross-field preferences in less than 2 minutes.</p>
@@ -90,7 +90,7 @@ $unread_messages = 3; // Pull real count dynamically from DB if logged in
 
   </main>
 
-  <!-- Shared Footer -->
+  <?php // Shared Footer ?>
   <?php if (file_exists('includes/footer.php')) include 'includes/footer.php'; ?>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

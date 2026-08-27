@@ -1,15 +1,10 @@
-<?php
-// ============================================================
-// KONEKT — List Applications
-// ============================================================
+﻿<?php
+// K
 // GET /api/jobs/list_applications.php
-//
 // For Job Seekers: lists their own applications
 //   Query: ?page=1&limit=20&status=pending
-//
 // For Employers: lists applications for a specific job
 //   Query: ?job_id=<id>&page=1&limit=20&status=pending
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -23,7 +18,7 @@ $offset = ($page - 1) * $limit;
 $status = $_GET['status'] ?? '';
 
 if ($user['role'] === 'job_seeker') {
-    // --- Job seeker: list own applications ---
+    // Job seeker: list own applications
     $where  = ['ja.user_id = :user_id'];
     $params = [':user_id' => $user['id']];
 
@@ -63,7 +58,7 @@ if ($user['role'] === 'job_seeker') {
     $applications = $stmt->fetchAll();
 
 } else {
-    // --- Employer: list applications for a job ---
+    // Employer: list applications for a job
     $jobId = isset($_GET['job_id']) ? (int) $_GET['job_id'] : 0;
 
     if (!$jobId) {

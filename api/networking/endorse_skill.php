@@ -1,18 +1,13 @@
-<?php
-// ============================================================
-// KONEKT — Endorse a Skill
-// ============================================================
+﻿<?php
+// K
 // POST /api/networking/endorse_skill.php
-//
 // Body (JSON):
 //   - user_id  (int, required — the user to endorse)
 //   - skill_id (int, required — the skill to endorse)
-//
 // Requirements:
 //   - Must be connected (accepted) with the user
 //   - Cannot endorse yourself
 //   - Cannot endorse the same skill twice
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -34,7 +29,7 @@ if ($endorsedUserId === $user['id']) {
 
 $db = getDB();
 
-// --- Verify connection ---
+// Verify connection
 $stmt = $db->prepare('
     SELECT id FROM connections
     WHERE status = "accepted"
@@ -54,7 +49,7 @@ if (!$stmt->fetch()) {
     jsonError('You must be connected to endorse this user.', 403);
 }
 
-// --- Verify the user has this skill ---
+// Verify the user has this skill
 $stmt = $db->prepare('
     SELECT id FROM user_skills WHERE user_id = :user_id AND skill_id = :skill_id
 ');
@@ -64,7 +59,7 @@ if (!$stmt->fetch()) {
     jsonError('This user does not have this skill in their profile.', 404);
 }
 
-// --- Check for duplicate endorsement ---
+// Check for duplicate endorsement
 $stmt = $db->prepare('
     SELECT id FROM endorsements
     WHERE endorser_id = :endorser_id AND endorsed_user_id = :endorsed_user_id AND skill_id = :skill_id
@@ -82,7 +77,7 @@ if ($stmt->fetch()) {
 try {
     $db->beginTransaction();
 
-    // --- Insert endorsement ---
+    // Insert endorsement
     $stmt = $db->prepare('
         INSERT INTO endorsements (endorser_id, endorsed_user_id, skill_id)
         VALUES (:endorser_id, :endorsed_user_id, :skill_id)
@@ -93,7 +88,7 @@ try {
         ':skill_id'         => $skillId,
     ]);
 
-    // --- Update endorsement count on user_skills ---
+    // Update endorsement count on user_skills
     $stmt = $db->prepare('
         UPDATE user_skills
         SET endorsement_count = endorsement_count + 1

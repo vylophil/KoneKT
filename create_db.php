@@ -1,9 +1,5 @@
 <?php
-// ============================================================
-// KONEKT — Bootstrap Script
-// Creates the konekt_db database if it does not already exist.
-// Run once via: http://localhost/konekt/create_db.php
-// ============================================================
+// Bootstrap script to create database if not exists
 
 // Connect without a database first (no dbname in DSN)
 try {

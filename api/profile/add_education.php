@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Add Education
-// ============================================================
+﻿<?php
+// K
 // POST /api/profile/add_education.php
-//
 // Body (JSON):
 //   - institution    (string, required)
 //   - degree         (string, required: high_school|associate|bachelors|masters|doctorate|certification|other)
@@ -13,7 +10,6 @@
 //   - is_current     (bool, optional)
 //   - grade          (string, optional)
 //   - description    (string, optional)
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -21,7 +17,7 @@ requireMethod('POST');
 $user = requireAuth();
 $data = getJsonBody();
 
-// --- Validate ---
+// Validate
 $errors = validateRequired($data, ['institution', 'degree', 'start_date']);
 if (!empty($errors)) {
     jsonError('Validation failed.', 422, $errors);

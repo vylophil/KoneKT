@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Create Job Posting
-// ============================================================
+﻿<?php
+// K
 // POST /api/jobs/create_job.php
-//
 // Body (JSON):
 //   - company_id            (int, required)
 //   - title                 (string, required)
@@ -21,7 +18,6 @@
 //   - education_requirement (string, optional: none|high_school|associate|bachelors|masters|doctorate)
 //   - deadline              (string, optional, Y-m-d)
 //   - skills                (array, optional: [{skill_id, importance}])
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -29,7 +25,7 @@ requireMethod('POST');
 $user = requireRole('employer');
 $data = getJsonBody();
 
-// --- Validate required fields ---
+// Validate required fields
 $errors = validateRequired($data, ['company_id', 'title', 'description', 'job_type']);
 if (!empty($errors)) {
     jsonError('Validation failed.', 422, $errors);
@@ -37,7 +33,7 @@ if (!empty($errors)) {
 
 $db = getDB();
 
-// --- Verify company ownership ---
+// Verify company ownership
 $stmt = $db->prepare('SELECT id FROM companies WHERE id = :id AND user_id = :user_id');
 $stmt->execute([':id' => (int) $data['company_id'], ':user_id' => $user['id']]);
 
@@ -45,7 +41,7 @@ if (!$stmt->fetch()) {
     jsonError('Company not found or access denied.', 404);
 }
 
-// --- Validate enums ---
+// Validate enums
 $validJobTypes = ['full_time', 'part_time', 'contract', 'internship', 'freelance'];
 if (!validateEnum($data['job_type'], $validJobTypes)) {
     jsonError('Invalid job_type.', 422);
@@ -70,7 +66,7 @@ if (isset($data['deadline']) && !validateDate($data['deadline'])) {
 try {
     $db->beginTransaction();
 
-    // --- Insert job posting ---
+    // Insert job posting
     $stmt = $db->prepare('
         INSERT INTO job_postings (
             company_id, employer_id, title, description, requirements,
@@ -105,7 +101,7 @@ try {
 
     $jobId = (int) $db->lastInsertId();
 
-    // --- Attach skills if provided ---
+    // Attach skills if provided
     if (isset($data['skills']) && is_array($data['skills'])) {
         $skillStmt = $db->prepare('
             INSERT INTO job_skills (job_id, skill_id, importance)

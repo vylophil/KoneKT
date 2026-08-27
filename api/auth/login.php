@@ -1,13 +1,9 @@
-<?php
-// ============================================================
-// KONEKT — User Login
-// ============================================================
+﻿<?php
+// K
 // POST /api/auth/login.php
-//
 // Body (JSON):
 //   - email     (string, required)
 //   - password  (string, required)
-// ============================================================
 
 session_start();
 
@@ -19,7 +15,7 @@ requireMethod('POST');
 
 $data = getJsonBody();
 
-// --- Validate required fields ---
+// Validate required fields
 $errors = validateRequired($data, ['email', 'password']);
 if (!empty($errors)) {
     jsonError('Validation failed.', 422, $errors);
@@ -28,14 +24,14 @@ if (!empty($errors)) {
 $email    = strtolower(trim($data['email']));
 $password = $data['password'];
 
-// --- Validate email format ---
+// Validate email format
 if (!validateEmail($email)) {
     jsonError('Invalid email address.', 422);
 }
 
 $db = getDB();
 
-// --- Fetch user by email ---
+// Fetch user by email
 $stmt = $db->prepare('
     SELECT id, email, password_hash, role, first_name, last_name, is_active
     FROM users
@@ -48,17 +44,17 @@ if (!$user) {
     jsonError('Invalid email or password.', 401);
 }
 
-// --- Check if account is active ---
+// Check if account is active
 if (!$user['is_active']) {
     jsonError('This account has been deactivated.', 403);
 }
 
-// --- Verify password ---
+// Verify password
 if (!password_verify($password, $user['password_hash'])) {
     jsonError('Invalid email or password.', 401);
 }
 
-// --- Set session ---
+// Set session
 $_SESSION['user_id']    = (int) $user['id'];
 $_SESSION['email']      = $user['email'];
 $_SESSION['role']       = $user['role'];

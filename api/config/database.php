@@ -1,9 +1,6 @@
-<?php
-// ============================================================
-// KONEKT — Database Configuration
-// ============================================================
+﻿<?php
+// K
 // PDO connection to MySQL via Laragon
-// ============================================================
 
 define('DB_HOST', '127.0.0.1');
 define('DB_PORT', '3306');
@@ -12,15 +9,7 @@ define('DB_USER', 'root');
 define('DB_PASS', '');           // Laragon default: no password
 define('DB_CHARSET', 'utf8mb4');
 
-/**
- * Get a PDO database connection instance.
- *
- * Uses a static variable to reuse the connection within a single
- * request (singleton pattern per request).
- *
- * @return PDO
- * @throws PDOException if connection fails
- */
+// Get a PDO database connection instance.
 function getDB(): PDO
 {
     static $pdo = null;

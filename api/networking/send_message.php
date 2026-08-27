@@ -1,15 +1,10 @@
-<?php
-// ============================================================
-// KONEKT — Send Message
-// ============================================================
+﻿<?php
+// K
 // POST /api/networking/send_message.php
-//
 // Body (JSON):
 //   - receiver_id (int, required)
 //   - content     (string, required)
-//
 // Users must be connected (accepted) to send messages.
-// ============================================================
 
 require_once __DIR__ . '/../auth/session.php';
 
@@ -35,7 +30,7 @@ if (mb_strlen($content) === 0) {
 
 $db = getDB();
 
-// --- Verify connection exists and is accepted ---
+// Verify connection exists and is accepted
 $stmt = $db->prepare('
     SELECT id FROM connections
     WHERE status = "accepted"
@@ -55,7 +50,7 @@ if (!$stmt->fetch()) {
     jsonError('You must be connected with this user to send messages.', 403);
 }
 
-// --- Insert message ---
+// Insert message
 $stmt = $db->prepare('
     INSERT INTO messages (sender_id, receiver_id, content)
     VALUES (:sender_id, :receiver_id, :content)

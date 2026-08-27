@@ -1,7 +1,7 @@
-<footer class="konekt-footer">
+﻿<footer class="konekt-footer">
   <div class="container">
     <div class="row g-4">
-      <!-- Brand & Tagline -->
+      <?php // Brand & Tagline ?>
       <div class="col-6 col-md-3">
         <a href="index.php" class="navbar-brand d-inline-flex align-items-center mb-2" style="font-family: var(--font-display); font-weight: 700; font-size: 1.2rem; color: var(--ink-navy);">
           <span class="match-pulse me-1"></span>
@@ -10,7 +10,7 @@
         <p class="mt-2 mb-0 text-secondary" style="font-size: 0.88rem;">Matching your resume to the right opportunity across fields.</p>
       </div>
 
-      <!-- Quick Links: Job Seekers -->
+      <?php // Quick Links: Job Seekers ?>
       <div class="col-6 col-md-3">
         <h6>Job Seekers</h6>
         <ul class="list-unstyled mb-0">
@@ -21,7 +21,7 @@
         </ul>
       </div>
 
-      <!-- Quick Links: Employers -->
+      <?php // Quick Links: Employers ?>
       <div class="col-6 col-md-3">
         <h6>Employers</h6>
         <ul class="list-unstyled mb-0">
@@ -32,7 +32,7 @@
         </ul>
       </div>
 
-      <!-- Quick Links: Network & Explore -->
+      <?php // Quick Links: Network & Explore ?>
       <div class="col-6 col-md-3">
         <h6>Network & Explore</h6>
         <ul class="list-unstyled mb-0">
@@ -43,7 +43,7 @@
       </div>
     </div>
 
-    <!-- Bottom Copyright Bar -->
+    <?php // Bottom Copyright Bar ?>
     <div class="footer-bottom d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
       <span>&copy; <?= date('Y') ?> KoneKT. All rights reserved.</span>
       <span>Built for job seekers who match on merit.</span>

@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (empty($_SESSION['user_id'])) {
   header('Location: login.php');
@@ -83,18 +83,18 @@ $activeFilters = array_filter(array_map('trim', explode(',', $userIndustry)));
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Job Matches · KoneKT</title>
 
-  <!-- Google Fonts -->
+  <?php // Google Fonts ?>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
 
-  <!-- Bootstrap 5 & Icons -->
+  <?php // Bootstrap 5 & Icons ?>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link href="assets/css/theme.css" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Shared Navbar -->
+  <?php // Shared Navbar ?>
   <?php if (file_exists('includes/navbar.php')) include 'includes/navbar.php'; ?>
 
   <main class="container py-5">
@@ -103,7 +103,7 @@ $activeFilters = array_filter(array_map('trim', explode(',', $userIndustry)));
       <div class="alert alert-success small mb-4"><i class="bi bi-check-circle me-1"></i> Preferences saved and matches recomputed!</div>
     <?php endif; ?>
 
-    <!-- Page Header -->
+    <?php // Page Header ?>
     <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center mb-4 gap-3">
       <div>
         <h1 class="h3 mb-1">Your Cross-Field Job Matches</h1>
@@ -114,7 +114,7 @@ $activeFilters = array_filter(array_map('trim', explode(',', $userIndustry)));
       </a>
     </div>
 
-    <!-- Active Field Filter Chips -->
+    <?php // Active Field Filter Chips ?>
     <?php if (!empty($activeFilters)): ?>
     <div class="mb-4 d-flex align-items-center gap-2 flex-wrap">
       <span class="text-secondary small fw-semibold me-2">Active Filters:</span>
@@ -125,7 +125,7 @@ $activeFilters = array_filter(array_map('trim', explode(',', $userIndustry)));
     <?php endif; ?>
 
     <?php if (empty($matches)): ?>
-      <!-- Empty state -->
+      <?php // Empty state ?>
       <div class="konekt-card p-5 text-center">
         <div class="empty-state">
           <i class="bi bi-stars"></i>
@@ -137,7 +137,7 @@ $activeFilters = array_filter(array_map('trim', explode(',', $userIndustry)));
     <?php else: ?>
     <div class="row g-4">
 
-      <!-- Match List -->
+      <?php // Match List ?>
       <div class="col-lg-8">
         <?php foreach ($matches as $match): ?>
         <div class="konekt-card p-4 mb-3">
@@ -172,7 +172,7 @@ $activeFilters = array_filter(array_map('trim', explode(',', $userIndustry)));
         <?php endforeach; ?>
       </div>
 
-      <!-- Sidebar summary -->
+      <?php // Sidebar summary ?>
       <div class="col-lg-4">
         <div class="konekt-card p-4 mb-4">
           <h3 class="h6 mb-3"><i class="bi bi-lightbulb text-warning me-2"></i>Match Insights</h3>
@@ -201,7 +201,7 @@ $activeFilters = array_filter(array_map('trim', explode(',', $userIndustry)));
     <?php endif; ?>
   </main>
 
-  <!-- Shared Footer -->
+  <?php // Shared Footer ?>
   <?php if (file_exists('includes/footer.php')) include 'includes/footer.php'; ?>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

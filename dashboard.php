@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (empty($_SESSION['user_id'])) {
   header('Location: login.php');
@@ -112,7 +112,7 @@ try {
     </div>
 
     <div class="row g-4">
-      <!-- Resume / matching status -->
+      <?php // Resume matching status ?>
       <div class="col-lg-8">
         <div class="konekt-card p-4 mb-4">
           <div class="d-flex justify-content-between align-items-start mb-3">
@@ -134,7 +134,7 @@ try {
           <a href="upload_resume.php" class="btn btn-konekt-outline btn-sm"><?= $resumeUrl ? 'Re-upload Resume' : 'Upload Resume' ?></a>
         </div>
 
-        <!-- Top Matches -->
+        <?php // Top matches ?>
         <div class="konekt-card p-4 mb-4">
           <h2 class="h5 mb-3">Top Matches for You</h2>
           <?php if (empty($topMatches)): ?>
@@ -152,7 +152,7 @@ try {
           <?php endif; ?>
         </div>
 
-        <!-- My Applications -->
+        <?php // My applications ?>
         <div class="konekt-card p-4">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <h2 class="h5 mb-0">My Applications</h2>
@@ -175,7 +175,7 @@ try {
         </div>
       </div>
 
-      <!-- Sidebar -->
+      <?php // Sidebar ?>
       <div class="col-lg-4">
         <div class="konekt-card p-4 mb-4">
           <h2 class="h6 mb-3">Your Preferences</h2>

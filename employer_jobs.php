@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 session_start();
 if (empty($_SESSION['user_id']) || ($_SESSION['role'] ?? '') !== 'employer') {
   header('Location: login.php');
@@ -151,7 +151,7 @@ try {
       <div class="alert <?= $saveOk ? 'alert-success' : 'alert-danger' ?> small"><?= $saveMsg ?></div>
     <?php endif; ?>
 
-    <!-- New Job Form (collapsible) -->
+    <?php // New job form ?>
     <div class="collapse mb-4" id="newJobForm">
       <div class="konekt-card p-4 p-md-5">
         <h2 class="h5 mb-4">Create New Job Posting</h2>
@@ -240,7 +240,7 @@ try {
       </div>
     </div>
 
-    <!-- Existing Jobs List -->
+    <?php // Existing jobs list ?>
     <?php if (empty($jobs)): ?>
       <div class="konekt-card p-5">
         <div class="empty-state">
