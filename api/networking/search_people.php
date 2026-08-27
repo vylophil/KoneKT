@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 // K
 // GET /api/networking/search_people.php
 // Query params:
@@ -132,8 +132,8 @@ foreach ($people as &$person) {
     $person['mutual_connections'] = (int) $stmt->fetchColumn();
 
     // Top skills
-    $stmt = $db->prepare('
-        SELECT s.name, us.proficiency_level
+    $stmt = $db->prepare("
+        SELECT us.user_id, s.name, us.proficiency_level
         FROM user_skills us
         JOIN skills s ON s.id = us.skill_id
         WHERE us.user_id IN ({$inClause})
