@@ -93,7 +93,7 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $people = $stmt->fetchAll();
 
-// Attach connection status and mutual connections count
+//Attach connection status and mutual connections count
 foreach ($people as &$person) {
     // Connection status
     $stmt = $db->prepare('
@@ -136,12 +136,71 @@ foreach ($people as &$person) {
         SELECT s.name, us.proficiency_level
         FROM user_skills us
         JOIN skills s ON s.id = us.skill_id
-        WHERE us.user_id = :user_id
+        WHERE us.user_id IN ({$inClause})
         ORDER BY us.endorsement_count DESC
-        LIMIT 5
+    ");
+    $stmt->execute($skillParams);
+    foreach ($stmt->fetchAll() as $row) {
+        $uid = (int) $row['user_id'];
+        if (!isset($skillsMap[$uid])) $skillsMap[$uid] = [];
+        if (count($skillsMap[$uid]) < 5) {
+            $skillsMap[$uid][] = ['name' => $row['name'], 'proficiency_level' => $row['proficiency_level']];
+        }
+    }
+}
+
+// Mutual connections count (single query)
+$mutualMap = [];
+if (!empty($personIds)) {
+    // Get all accepted connections for the current user
+    $myConnStmt = $db->prepare('
+        SELECT IF(requester_id = :me1, receiver_id, requester_id) AS friend_id
+        FROM connections
+        WHERE (requester_id = :me2 OR receiver_id = :me3)
+        AND status = :status
     ');
-    $stmt->execute([':user_id' => $person['id']]);
-    $person['top_skills'] = $stmt->fetchAll();
+    $myConnStmt->execute([':me1' => $user['id'], ':me2' => $user['id'], ':me3' => $user['id'], ':status' => 'accepted']);
+    $myFriends = array_column($myConnStmt->fetchAll(), 'friend_id');
+
+    if (!empty($myFriends)) {
+        $placeholders = [];
+        $mutualParams = [];
+        foreach ($personIds as $i => $pid) {
+            $placeholders[] = ":mpid_{$i}";
+            $mutualParams[":mpid_{$i}"] = $pid;
+        }
+        $friendPlaceholders = [];
+        foreach ($myFriends as $j => $fid) {
+            $friendPlaceholders[] = ":fid_{$j}";
+            $mutualParams[":fid_{$j}"] = $fid;
+        }
+        $inPeople = implode(',', $placeholders);
+        $inFriends = implode(',', $friendPlaceholders);
+        $stmt = $db->prepare("
+            SELECT
+                IF(requester_id IN ({$inPeople}), requester_id, receiver_id) AS person_id,
+                COUNT(*) AS mutual_count
+            FROM connections
+            WHERE status = 'accepted'
+            AND (
+                (requester_id IN ({$inPeople}) AND receiver_id IN ({$inFriends}))
+                OR (receiver_id IN ({$inPeople}) AND requester_id IN ({$inFriends}))
+            )
+            GROUP BY person_id
+        ");
+        $stmt->execute($mutualParams);
+        foreach ($stmt->fetchAll() as $row) {
+            $mutualMap[(int) $row['person_id']] = (int) $row['mutual_count'];
+        }
+    }
+}
+
+// Assign to each person
+foreach ($people as &$person) {
+    $pid = (int) $person['id'];
+    $person['connection_status'] = $connStatusMap[$pid] ?? 'none';
+    $person['mutual_connections'] = $mutualMap[$pid] ?? 0;
+    $person['top_skills'] = $skillsMap[$pid] ?? [];
 }
 
 jsonSuccess([

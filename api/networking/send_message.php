@@ -33,13 +33,14 @@ $db = getDB();
 // Verify connection exists and is accepted
 $stmt = $db->prepare('
     SELECT id FROM connections
-    WHERE status = "accepted"
+    WHERE status = :status
     AND (
         (requester_id = :uid1 AND receiver_id = :uid2)
         OR (requester_id = :uid2b AND receiver_id = :uid1b)
     )
 ');
 $stmt->execute([
+    ':status' => 'accepted',
     ':uid1'  => $user['id'],
     ':uid2'  => $receiverId,
     ':uid2b' => $receiverId,

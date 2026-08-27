@@ -28,9 +28,9 @@ $db = getDB();
 // Verify the request was sent TO this user and is pending
 $stmt = $db->prepare('
     SELECT id, requester_id FROM connections
-    WHERE id = :id AND receiver_id = :receiver_id AND status = "pending"
+    WHERE id = :id AND receiver_id = :receiver_id AND status = :status
 ');
-$stmt->execute([':id' => $connectionId, ':receiver_id' => $user['id']]);
+$stmt->execute([':id' => $connectionId, ':receiver_id' => $user['id'], ':status' => 'pending']);
 $connection = $stmt->fetch();
 
 if (!$connection) {

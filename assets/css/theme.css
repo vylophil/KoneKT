@@ -424,6 +424,10 @@ a:hover {
   box-shadow: var(--shadow-md);
 }
 
+.konekt-card.no-hover-lift:hover {
+  box-shadow: var(--shadow-sm);
+}
+
 .skill-toolbar {
   background: var(--mist);
   border: 1px solid var(--line);
@@ -700,4 +704,363 @@ a:hover {
   padding-top: 1.25rem;
   font-size: 0.82rem;
   color: var(--slate-light);
+}
+
+/* ============================================
+   Network Page — Search Result Actions
+   ============================================ */
+.konekt-search-item-actions {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+  align-items: center;
+}
+
+.konekt-search-item-actions .btn {
+  font-size: 0.72rem;
+  padding: 3px 10px;
+  border-radius: 16px;
+  font-weight: 600;
+  white-space: nowrap;
+  line-height: 1.5;
+  transition: all 0.2s ease;
+}
+
+.btn-connect {
+  background: var(--signal-blue);
+  border: 1px solid var(--signal-blue);
+  color: var(--white);
+}
+.btn-connect:hover {
+  background: var(--signal-blue-dark);
+  border-color: var(--signal-blue-dark);
+  color: var(--white);
+  transform: translateY(-1px);
+  box-shadow: 0 3px 8px rgba(40, 120, 212, 0.3);
+}
+.btn-connect:disabled {
+  opacity: 0.6;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-pending-badge {
+  background: var(--warning-yellow-soft);
+  border: 1px solid #FCD34D;
+  color: #92400E;
+  cursor: default;
+}
+
+.btn-connected-badge {
+  background: var(--success-green-soft);
+  border: 1px solid #86EFAC;
+  color: #166534;
+  cursor: default;
+}
+
+.konekt-search-mutual {
+  font-size: 0.68rem;
+  color: var(--slate-light);
+  margin-top: 1px;
+}
+
+/* ============================================
+   Network Page — Date Separators (Chat)
+   ============================================ */
+.chat-date-separator {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  margin: 4px 0;
+}
+
+.chat-date-separator::before,
+.chat-date-separator::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--line);
+}
+
+.chat-date-separator span {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--slate-light);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+/* ============================================
+   Network Page — Read Receipt Indicators
+   ============================================ */
+.msg-read-receipt {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+.msg-read-receipt i {
+  font-size: 0.65rem;
+}
+
+.msg-read-receipt.sent i {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.msg-read-receipt.read i {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+/* ============================================
+   Network Page — Connection Response Transitions
+   ============================================ */
+.conn-request-row {
+  transition: all 0.35s ease;
+  overflow: hidden;
+  max-height: 80px;
+}
+
+.conn-request-row.responded {
+  max-height: 40px;
+  opacity: 0.7;
+}
+
+.conn-request-row.removing {
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  margin: 0 !important;
+  border: none !important;
+}
+
+/* ============================================
+   Network Page — My Connections Section
+   ============================================ */
+.network-tabs {
+  display: flex !important;
+  gap: 2px;
+  margin-bottom: 12px;
+  background: var(--mist);
+  border-radius: var(--radius);
+  padding: 3px;
+  overflow: hidden;
+}
+
+.network-tab {
+  flex: 1;
+  text-align: center;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--slate);
+  background: transparent;
+  border: none !important;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-body);
+  outline: none !important;
+  box-shadow: none !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  line-height: 1.4;
+}
+
+.network-tab:hover {
+  color: var(--ink-navy);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.network-tab.active {
+  color: var(--ink-navy);
+  background: var(--white);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08) !important;
+}
+
+.network-tab .tab-count {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 600;
+  background: var(--line);
+  color: var(--slate);
+  border-radius: 10px;
+  padding: 1px 6px;
+  margin-left: 4px;
+  vertical-align: 1px;
+}
+
+.network-tab.active .tab-count {
+  background: var(--signal-blue);
+  color: var(--white);
+}
+
+.network-tab-content {
+  display: none !important;
+}
+
+.network-tab-content.active {
+  display: block !important;
+}
+
+a.connection-item,
+.connection-item {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 4px;
+  transition: background-color 0.15s ease;
+  text-decoration: none !important;
+  color: inherit;
+}
+
+.connection-item:hover {
+  background-color: var(--mist);
+  color: inherit;
+  text-decoration: none;
+}
+
+.connection-item .connection-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.connection-item .connection-name {
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--ink-navy);
+  margin-bottom: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.connection-item .connection-headline {
+  font-size: 0.73rem;
+  color: var(--slate);
+  margin-bottom: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.connection-item .btn-sm {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 14px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* ============================================
+   Network Page — Message Bubble Animations
+   ============================================ */
+.chat-msg-enter {
+  animation: msgSlideIn 0.25s ease-out;
+}
+
+@keyframes msgSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ============================================
+   Network Page — Mobile Responsive Layout
+   ============================================ */
+@media (max-width: 991.98px) {
+  .network-sidebar {
+    display: block;
+  }
+
+  .network-chat-panel {
+    display: none;
+  }
+
+  .network-chat-panel.mobile-active {
+    display: flex;
+  }
+
+  .network-sidebar.mobile-hidden {
+    display: none;
+  }
+
+  .mobile-back-btn {
+    display: inline-flex !important;
+  }
+}
+
+.mobile-back-btn {
+  background: none;
+  border: none;
+  color: var(--signal-blue);
+  font-size: 0.88rem;
+  font-weight: 600;
+  padding: 0;
+  cursor: pointer;
+  display: none !important;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--font-body);
+}
+
+.mobile-back-btn:hover {
+  color: var(--signal-blue-dark);
+}
+
+@media (max-width: 991.98px) {
+  .mobile-back-btn {
+    display: inline-flex !important;
+  }
+}
+
+/* ============================================
+   Network Page — Empty State Enhanced
+   ============================================ */
+.empty-state-network {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: var(--slate);
+}
+
+.empty-state-network .empty-icon-wrap {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--info-blue-soft), var(--mist));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.2rem;
+  animation: emptyPulse 3s ease-in-out infinite;
+}
+
+.empty-state-network .empty-icon-wrap i {
+  font-size: 2rem;
+  color: var(--signal-blue);
+  opacity: 0.7;
+}
+
+@keyframes emptyPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .empty-state-network .empty-icon-wrap { animation: none; }
+  .chat-msg-enter { animation: none; }
 }
