@@ -97,55 +97,115 @@ $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $stmt->execute();
 $people = $stmt->fetchAll();
 
-// --- Attach connection status and mutual connections count ---
-foreach ($people as &$person) {
-    // Connection status
-    $stmt = $db->prepare('
-        SELECT status FROM connections
-        WHERE (requester_id = :uid1 AND receiver_id = :uid2)
-           OR (requester_id = :uid2b AND receiver_id = :uid1b)
-    ');
-    $stmt->execute([
-        ':uid1'  => $user['id'],
-        ':uid2'  => $person['id'],
-        ':uid2b' => $person['id'],
-        ':uid1b' => $user['id'],
-    ]);
-    $conn = $stmt->fetch();
-    $person['connection_status'] = $conn ? $conn['status'] : 'none';
+// --- Batch-fetch connection status and top skills for all results ---
+$personIds = array_column($people, 'id');
 
-    // Mutual connections count
-    $stmt = $db->prepare('
-        SELECT COUNT(*) FROM connections c1
-        JOIN connections c2 ON (
-            (c2.requester_id = :person_id AND c2.receiver_id = IF(c1.requester_id = :me1, c1.receiver_id, c1.requester_id))
-            OR (c2.receiver_id = :person_id2 AND c2.requester_id = IF(c1.requester_id = :me2, c1.receiver_id, c1.requester_id))
-        )
-        WHERE (c1.requester_id = :me3 OR c1.receiver_id = :me4)
-        AND c1.status = "accepted"
-        AND c2.status = "accepted"
-    ');
-    $stmt->execute([
-        ':person_id'  => $person['id'],
-        ':person_id2' => $person['id'],
-        ':me1' => $user['id'],
-        ':me2' => $user['id'],
-        ':me3' => $user['id'],
-        ':me4' => $user['id'],
-    ]);
-    $person['mutual_connections'] = (int) $stmt->fetchColumn();
+// Connection statuses (single query)
+$connStatusMap = [];
+if (!empty($personIds)) {
+    $placeholders = [];
+    $connParams = [];
+    foreach ($personIds as $i => $pid) {
+        $placeholders[] = ":pid_{$i}";
+        $connParams[":pid_{$i}"] = $pid;
+    }
+    $inClause = implode(',', $placeholders);
+    $stmt = $db->prepare("
+        SELECT
+            IF(requester_id = :me1, receiver_id, requester_id) AS other_id,
+            status
+        FROM connections
+        WHERE (requester_id = :me2 AND receiver_id IN ({$inClause}))
+           OR (receiver_id = :me3 AND requester_id IN ({$inClause}))
+    ");
+    $connParams[':me1'] = $user['id'];
+    $connParams[':me2'] = $user['id'];
+    $connParams[':me3'] = $user['id'];
+    $stmt->execute($connParams);
+    foreach ($stmt->fetchAll() as $row) {
+        $connStatusMap[(int) $row['other_id']] = $row['status'];
+    }
+}
 
-    // Top skills
-    $stmt = $db->prepare('
-        SELECT s.name, us.proficiency_level
+// Top skills (single query, grouped by user)
+$skillsMap = [];
+if (!empty($personIds)) {
+    $placeholders = [];
+    $skillParams = [];
+    foreach ($personIds as $i => $pid) {
+        $placeholders[] = ":spid_{$i}";
+        $skillParams[":spid_{$i}"] = $pid;
+    }
+    $inClause = implode(',', $placeholders);
+    $stmt = $db->prepare("
+        SELECT us.user_id, s.name, us.proficiency_level
         FROM user_skills us
         JOIN skills s ON s.id = us.skill_id
-        WHERE us.user_id = :user_id
+        WHERE us.user_id IN ({$inClause})
         ORDER BY us.endorsement_count DESC
-        LIMIT 5
+    ");
+    $stmt->execute($skillParams);
+    foreach ($stmt->fetchAll() as $row) {
+        $uid = (int) $row['user_id'];
+        if (!isset($skillsMap[$uid])) $skillsMap[$uid] = [];
+        if (count($skillsMap[$uid]) < 5) {
+            $skillsMap[$uid][] = ['name' => $row['name'], 'proficiency_level' => $row['proficiency_level']];
+        }
+    }
+}
+
+// Mutual connections count (single query)
+$mutualMap = [];
+if (!empty($personIds)) {
+    // Get all accepted connections for the current user
+    $myConnStmt = $db->prepare('
+        SELECT IF(requester_id = :me1, receiver_id, requester_id) AS friend_id
+        FROM connections
+        WHERE (requester_id = :me2 OR receiver_id = :me3)
+        AND status = :status
     ');
-    $stmt->execute([':user_id' => $person['id']]);
-    $person['top_skills'] = $stmt->fetchAll();
+    $myConnStmt->execute([':me1' => $user['id'], ':me2' => $user['id'], ':me3' => $user['id'], ':status' => 'accepted']);
+    $myFriends = array_column($myConnStmt->fetchAll(), 'friend_id');
+
+    if (!empty($myFriends)) {
+        $placeholders = [];
+        $mutualParams = [];
+        foreach ($personIds as $i => $pid) {
+            $placeholders[] = ":mpid_{$i}";
+            $mutualParams[":mpid_{$i}"] = $pid;
+        }
+        $friendPlaceholders = [];
+        foreach ($myFriends as $j => $fid) {
+            $friendPlaceholders[] = ":fid_{$j}";
+            $mutualParams[":fid_{$j}"] = $fid;
+        }
+        $inPeople = implode(',', $placeholders);
+        $inFriends = implode(',', $friendPlaceholders);
+        $stmt = $db->prepare("
+            SELECT
+                IF(requester_id IN ({$inPeople}), requester_id, receiver_id) AS person_id,
+                COUNT(*) AS mutual_count
+            FROM connections
+            WHERE status = 'accepted'
+            AND (
+                (requester_id IN ({$inPeople}) AND receiver_id IN ({$inFriends}))
+                OR (receiver_id IN ({$inPeople}) AND requester_id IN ({$inFriends}))
+            )
+            GROUP BY person_id
+        ");
+        $stmt->execute($mutualParams);
+        foreach ($stmt->fetchAll() as $row) {
+            $mutualMap[(int) $row['person_id']] = (int) $row['mutual_count'];
+        }
+    }
+}
+
+// Assign to each person
+foreach ($people as &$person) {
+    $pid = (int) $person['id'];
+    $person['connection_status'] = $connStatusMap[$pid] ?? 'none';
+    $person['mutual_connections'] = $mutualMap[$pid] ?? 0;
+    $person['top_skills'] = $skillsMap[$pid] ?? [];
 }
 
 jsonSuccess([
